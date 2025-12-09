@@ -1,0 +1,10 @@
+{
+  "welcome": "Welcome",
+  "settings": "Settings",
+  "language": "Language",
+  "darkMode": "Dark Mode",
+  "adminPanel": "Admin Panel",
+  "logout": "Log Out",
+  "products": "Products",
+  "orders": "My Orders"
+}

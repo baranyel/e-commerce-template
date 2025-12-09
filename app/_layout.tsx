@@ -1,58 +1,81 @@
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
+import { useEffect } from "react";
+import { Stack, useRouter, useSegments } from "expo-router";
+import { AuthProvider, useAuth } from "../context/AuthContext";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import { View, ActivityIndicator } from "react-native";
+import { CartProvider } from "../context/CartContext";
+import CartSidebar from "../components/CartSidebar";
+import AsyncStorage from "@react-native-async-storage/async-storage"; // <-- Import ekle
+import i18n from "../i18n/i18n"; // <-- i18n'i import et
+import "../global.css";
 
-import { useColorScheme } from '@/components/useColorScheme';
-
-export {
-  // Catch any errors thrown by the Layout component.
-  ErrorBoundary,
-} from 'expo-router';
-
-export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: '(tabs)',
-};
-
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
-
-export default function RootLayout() {
-  const [loaded, error] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-    ...FontAwesome.font,
-  });
-
-  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
-  useEffect(() => {
-    if (error) throw error;
-  }, [error]);
+// Bu component sadece routing kontrolünü yapar
+function RootLayoutNav() {
+  const { user, loading } = useAuth();
+  const segments = useSegments(); // Kullanıcının şu an hangi sayfada olduğunu söyler
+  const router = useRouter();
 
   useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
+    if (loading) return;
+
+    const inTabsGroup = segments[0] === "(tabs)";
+    const inLoginRoute = segments[0] === "login"; // Kullanıcı şu an Login sayfasında mı?
+
+    if (!user && !inLoginRoute) {
+      // 1. Kullanıcı YOKSA ve Login sayfasında DEĞİLSE -> Login'e at
+      router.replace("/login");
+    } else if (user && inLoginRoute) {
+      // 2. Kullanıcı VARSA ve Login sayfasına girmeye çalışıyorsa -> Ana Sayfaya (Tabs) at
+      router.replace("/(tabs)");
     }
-  }, [loaded]);
+    // 3. Kullanıcı VARSA ve Login dışında bir yerdeyse (Örn: /product/123) -> KARIŞMA, rahat bıraksın.
+  }, [user, loading, segments]);
 
-  if (!loaded) {
-    return null;
+  useEffect(() => {
+    const loadLanguage = async () => {
+      try {
+        const savedLanguage = await AsyncStorage.getItem("language");
+        if (savedLanguage) {
+          i18n.changeLanguage(savedLanguage);
+        }
+      } catch (e) {
+        console.log("Dil yüklenemedi:", e);
+      }
+    };
+    loadLanguage();
+  }, []);
+
+  if (loading) {
+    // Siyah ekran yerine dönen bir çark gösterelim
+    return (
+      <View className="flex-1 justify-center items-center bg-white">
+        <ActivityIndicator size="large" color="#4a2c2a" />
+        {/* NativeWind v4 ile stil veriyoruz */}
+      </View>
+    );
   }
 
-  return <RootLayoutNav />;
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      {/* Login ekranı */}
+      <Stack.Screen name="login" options={{ headerShown: false }} />
+      {/* Ana uygulama (Sekmeler) */}
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+    </Stack>
+  );
 }
 
-function RootLayoutNav() {
-  const colorScheme = useColorScheme();
-
+export default function RootLayout() {
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-      </Stack>
-    </ThemeProvider>
+    <SafeAreaProvider>
+      <AuthProvider>
+        <CartProvider>
+          {" "}
+          {/* <-- AUTH PROVIDER'IN İÇİNE EKLE */}
+          <RootLayoutNav />
+          <CartSidebar />
+        </CartProvider>
+      </AuthProvider>
+    </SafeAreaProvider>
   );
 }
