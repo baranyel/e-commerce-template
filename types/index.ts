@@ -6,6 +6,11 @@ export interface UserProfile {
   fullName: string;
   role: UserRole;
   createdAt: number;
+  phone?: string;
+  addressTitle?: string;
+  city?: string;
+  district?: string;
+  fullAddress?: string;
 }
 
 export interface Product {

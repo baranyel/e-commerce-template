@@ -145,9 +145,8 @@ export default function CartSidebar() {
                 </View>
                 <TouchableOpacity
                   onPress={() => {
-                    toggleCart();
-                    // İleride Checkout sayfasına yönlendireceğiz
-                    alert("Ödeme sayfasına gidiliyor...");
+                    toggleCart(); // Önce sepeti kapat ki checkout sayfasının üstünde kalmasın
+                    router.push("/checkout"); // <-- DİREKT YÖNLENDİRME
                   }}
                   className="bg-amber-900 p-4 rounded-xl flex-row justify-center items-center"
                 >

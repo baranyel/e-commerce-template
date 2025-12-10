@@ -22,16 +22,22 @@ import { db } from "../../firebase/config";
 import { Product } from "../../types";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 
-// Kategori seçenekleri
-const CATEGORIES = [
-  { id: "all", label: "Tümü" },
-  { id: "coffee", label: "Kahve" },
-  { id: "equipment", label: "Ekipman" },
-];
+interface Category {
+  id: string;
+  name: string;
+}
 
 export default function AdminDashboard() {
+  const { t } = useTranslation();
   const router = useRouter();
+
+  // DİNAMİK KATEGORİ STATE
+  const [categories, setCategories] = useState<Category[]>([
+    { id: "all", name: "all" },
+  ]);
+  const [selectedCategory, setSelectedCategory] = useState("all");
 
   // Veri State'leri
   const [allProducts, setAllProducts] = useState<Product[]>([]);
@@ -40,7 +46,6 @@ export default function AdminDashboard() {
 
   // Filtre State'leri
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
   const [isGridLayout, setIsGridLayout] = useState(false); // Varsayılan liste olsun, detay görmek için
 
   // 1. Verileri Canlı Dinle
@@ -53,6 +58,18 @@ export default function AdminDashboard() {
       })) as Product[];
       setAllProducts(data);
       setLoading(false);
+    });
+    return unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    const q = query(collection(db, "categories"), orderBy("name"));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const fetchedCats = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Category[];
+      setCategories([{ id: "all", name: "all" }, ...fetchedCats]);
     });
     return unsubscribe;
   }, []);
@@ -240,31 +257,39 @@ export default function AdminDashboard() {
           )}
         </View>
 
-        {/* Filtreler ve Layout Butonu */}
+        {/* --- DİNAMİK FİLTRELER (DEĞİŞEN KISIM) --- */}
         <View className="flex-row justify-between items-center mb-2">
-          <View className="flex-row space-x-2">
-            {CATEGORIES.map((cat) => (
+          {/* ScrollView kullanıyoruz ki kategoriler taşarsa kaydırılabilsin */}
+          <FlatList
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            data={categories}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
               <TouchableOpacity
-                key={cat.id}
-                onPress={() => setSelectedCategory(cat.id)}
-                className={`px-3 py-1.5 rounded-full ${
-                  selectedCategory === cat.id ? "bg-amber-900" : "bg-gray-100"
+                onPress={() => setSelectedCategory(item.name)}
+                className={`px-3 py-1.5 rounded-full mr-2 ${
+                  selectedCategory === item.name
+                    ? "bg-amber-900"
+                    : "bg-gray-100"
                 }`}
               >
                 <Text
                   className={`text-xs font-bold ${
-                    selectedCategory === cat.id ? "text-white" : "text-gray-600"
+                    selectedCategory === item.name
+                      ? "text-white"
+                      : "text-gray-600"
                   }`}
                 >
-                  {cat.label}
+                  {item.id === "all" ? t("common.all") : item.name}
                 </Text>
               </TouchableOpacity>
-            ))}
-          </View>
+            )}
+          />
 
           <TouchableOpacity
             onPress={() => setIsGridLayout(!isGridLayout)}
-            className="p-2 bg-gray-100 rounded-lg"
+            className="p-2 bg-gray-100 rounded-lg ml-2"
           >
             <Ionicons
               name={isGridLayout ? "list" : "grid"}

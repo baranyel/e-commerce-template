@@ -11,7 +11,9 @@ import {
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../firebase/config";
+import CategorySelector from "../../../components/CategorySelector"; // Yol ../../../ olabilir dikkat
 import { Product } from "../../../types";
+import Toast from "react-native-toast-message";
 
 export default function EditProductScreen() {
   const { id } = useLocalSearchParams();
@@ -46,7 +48,12 @@ export default function EditProductScreen() {
             stock: data.stock.toString(),
           });
         } else {
-          Alert.alert("Hata", "Ürün bulunamadı!");
+          Toast.show({
+            type: "error",
+            text1: "Hata",
+            text2: "Ürün bulunamadı!",
+            visibilityTime: 2000,
+          });
           router.back();
         }
       } catch (error) {
@@ -59,8 +66,15 @@ export default function EditProductScreen() {
   }, [id]);
 
   const handleUpdate = async () => {
-    if (!form.title || !form.price)
-      return Alert.alert("Hata", "Başlık ve Fiyat zorunludur.");
+    if (!form.title || !form.price) {
+      Toast.show({
+        type: "error",
+        text1: "Hata",
+        text2: "Başlık ve Fiyat zorunludur.",
+        visibilityTime: 2000,
+      });
+      return;
+    }
     setSubmitting(true);
 
     try {
@@ -74,12 +88,20 @@ export default function EditProductScreen() {
         images: [form.imageUrl], // Tek resim URL'si güncelliyoruz
       });
 
-      Alert.alert("Başarılı", "Ürün güncellendi!", [
-        { text: "Tamam", onPress: () => router.back() },
-      ]);
+      Toast.show({
+        type: "success",
+        text1: "Başarılı! 🎉",
+        text2: "Ürün güncellendi.",
+        visibilityTime: 2000, // 2 saniye ekranda kalsın
+      });
     } catch (error) {
       console.error(error);
-      Alert.alert("Hata", "Güncelleme başarısız.");
+      Toast.show({
+        type: "error",
+        text1: "Başarısız! ❌",
+        text2: "Ürün güncellenirken bir sorun oluştu.",
+        visibilityTime: 2000, // 2 saniye ekranda kalsın
+      });
     } finally {
       setSubmitting(false);
     }
@@ -118,13 +140,9 @@ export default function EditProductScreen() {
         </View>
       </View>
 
-      <Text className="text-gray-500 mb-2 font-bold">
-        Kategori (coffee, equipment)
-      </Text>
-      <TextInput
-        value={form.category}
-        onChangeText={(text) => setForm({ ...form, category: text })}
-        className="bg-gray-50 p-3 rounded-xl border border-gray-200 mb-4"
+      <CategorySelector
+        selectedCategory={form.category}
+        onSelect={(category) => setForm({ ...form, category })}
       />
 
       <Text className="text-gray-500 mb-2 font-bold">Resim URL</Text>

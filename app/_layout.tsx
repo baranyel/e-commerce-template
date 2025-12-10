@@ -6,6 +6,7 @@ import { View, ActivityIndicator } from "react-native";
 import { CartProvider } from "../context/CartContext";
 import CartSidebar from "../components/CartSidebar";
 import AsyncStorage from "@react-native-async-storage/async-storage"; // <-- Import ekle
+import Toast from "react-native-toast-message";
 import i18n from "../i18n/i18n"; // <-- i18n'i import et
 import "../global.css";
 
@@ -74,6 +75,7 @@ export default function RootLayout() {
           {/* <-- AUTH PROVIDER'IN İÇİNE EKLE */}
           <RootLayoutNav />
           <CartSidebar />
+          <Toast />
         </CartProvider>
       </AuthProvider>
     </SafeAreaProvider>

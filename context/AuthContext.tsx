@@ -1,12 +1,12 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { onAuthStateChanged, User } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, onSnapshot } from "firebase/firestore"; // <-- onSnapshot EKLENDİ
 import { auth, db } from "../firebase/config";
 import { UserProfile } from "../types";
 
 interface AuthContextType {
-  user: User | null; // Firebase'in kendi user objesi
-  userProfile: UserProfile | null; // Bizim veritabanındaki detaylı profil (rol bilgisi burada)
+  user: User | null;
+  userProfile: UserProfile | null;
   loading: boolean;
   isAdmin: boolean;
 }
@@ -21,27 +21,43 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Firebase Auth durumunu dinle (Giriş/Çıkış olduğunda tetiklenir)
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+    // 1. Firebase Auth Dinleyicisi
+    const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser);
 
       if (firebaseUser) {
-        // Kullanıcı giriş yaptıysa, Firestore'dan rolünü ve detaylarını çek
+        setLoading(true);
+        // 2. Firestore Profil Dinleyicisi (CANLI TAKİP)
         const userDocRef = doc(db, "users", firebaseUser.uid);
-        const userDoc = await getDoc(userDocRef);
 
-        if (userDoc.exists()) {
-          setUserProfile(userDoc.data() as UserProfile);
-        }
+        // onSnapshot: Veritabanında profil değiştiği an (mobilde veya webde)
+        // burası tetiklenir ve tüm uygulamadaki veriyi günceller.
+        const unsubscribeProfile = onSnapshot(
+          userDocRef,
+          (docSnapshot) => {
+            if (docSnapshot.exists()) {
+              setUserProfile(docSnapshot.data() as UserProfile);
+            } else {
+              setUserProfile(null);
+            }
+            setLoading(false);
+          },
+          (error) => {
+            console.error("Profil dinleme hatası:", error);
+            setLoading(false);
+          }
+        );
+
+        // Cleanup: Kullanıcı çıkış yaparsa profil dinlemeyi bırak
+        return () => unsubscribeProfile();
       } else {
-        // Kullanıcı çıkış yaptıysa profili sıfırla
+        // Kullanıcı yoksa her şeyi sıfırla
         setUserProfile(null);
+        setLoading(false);
       }
-
-      setLoading(false);
     });
 
-    return unsubscribe;
+    return unsubscribeAuth;
   }, []);
 
   const isAdmin = userProfile?.role === "admin";

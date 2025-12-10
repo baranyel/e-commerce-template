@@ -3,10 +3,10 @@ import {
   View,
   Text,
   TouchableOpacity,
-  Image,
-  Switch,
   ScrollView,
   Alert,
+  Modal,
+  FlatList,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../../context/AuthContext";
@@ -15,41 +15,49 @@ import { signOut } from "firebase/auth";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import "../../i18n/i18n"; // i18n başlatıcıyı import et
+import "../../i18n/i18n";
 import { useRouter } from "expo-router";
 
+// Dil Seçenekleri (Bayraklar ve Kodlar)
+const LANGUAGES = [
+  { code: "tr", name: "Türkçe", flag: "🇹🇷" },
+  { code: "en", name: "English", flag: "🇬🇧" },
+  { code: "de", name: "Deutsch", flag: "🇩🇪" },
+];
+
 export default function ProfileScreen() {
-  const { user, userProfile, isAdmin } = useAuth();
+  const { user, isAdmin } = useAuth();
   const { t, i18n } = useTranslation();
   const router = useRouter();
 
-  // Dil Durumu (Türkçe mi?)
-  const [isTurkish, setIsTurkish] = useState(i18n.language === "tr");
+  // Modal Görünürlüğü
+  const [modalVisible, setModalVisible] = useState(false);
 
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      // _layout.tsx zaten bizi login'e atacak
     } catch (error) {
       console.error(error);
     }
   };
 
-  const toggleLanguage = async () => {
-    const newLang = isTurkish ? "en" : "tr";
-    setIsTurkish(!isTurkish);
-    await i18n.changeLanguage(newLang);
-    await AsyncStorage.setItem("language", newLang);
+  const changeLanguage = async (langCode: string) => {
+    await i18n.changeLanguage(langCode);
+    await AsyncStorage.setItem("language", langCode);
+    setModalVisible(false); // Seçim yapınca modalı kapat
   };
 
   const handleAdminAccess = () => {
     if (isAdmin) {
-      // Admin Dashboard'a git
       router.push("/(admin)/dashboard");
     } else {
-      Alert.alert("Erişim Reddedildi", "Bu alana sadece yetkililer girebilir.");
+      Alert.alert(t("common.error"), "Yetkisiz giriş.");
     }
   };
+
+  // Şu anki dili bul (Bayrağını göstermek için)
+  const currentLang =
+    LANGUAGES.find((l) => l.code === i18n.language) || LANGUAGES[0];
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
@@ -60,11 +68,10 @@ export default function ProfileScreen() {
             <Text className="text-4xl">☕</Text>
           </View>
           <Text className="text-2xl font-bold text-gray-900">
-            {user?.displayName || "Misafir Kullanıcı"}
+            {user?.displayName || user?.email || "Misafir"}
           </Text>
           <Text className="text-gray-500">{user?.email}</Text>
 
-          {/* Admin Rozeti */}
           {isAdmin && (
             <View className="bg-amber-100 px-3 py-1 rounded-full mt-2 border border-amber-200">
               <Text className="text-amber-800 text-xs font-bold uppercase">
@@ -76,7 +83,7 @@ export default function ProfileScreen() {
 
         {/* Menü Grupları */}
         <View className="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
-          {/* Admin Paneli Girişi (Sadece Adminlere Gözükür) */}
+          {/* Admin Paneli */}
           {isAdmin && (
             <TouchableOpacity
               onPress={handleAdminAccess}
@@ -93,7 +100,10 @@ export default function ProfileScreen() {
           )}
 
           {/* Siparişlerim */}
-          <TouchableOpacity className="flex-row items-center p-4 border-b border-gray-100">
+          <TouchableOpacity
+            onPress={() => router.push("/orders")}
+            className="flex-row items-center p-4 border-b border-gray-100"
+          >
             <Ionicons
               name="cube-outline"
               size={22}
@@ -101,13 +111,33 @@ export default function ProfileScreen() {
               className="mr-3"
             />
             <Text className="flex-1 text-gray-700 text-base ml-3">
-              {t("orders")}
+              {t("orders.title")}
             </Text>
             <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
           </TouchableOpacity>
 
-          {/* Dil Değiştirme */}
-          <View className="flex-row items-center p-4 justify-between border-b border-gray-100">
+          {/* Adres Bilgilerim */}
+          <TouchableOpacity
+            onPress={() => router.push("/profile-edit")}
+            className="flex-row items-center p-4 border-b border-gray-100"
+          >
+            <Ionicons
+              name="location-outline"
+              size={22}
+              color="#4b5563"
+              className="mr-3"
+            />
+            <Text className="flex-1 text-gray-700 text-base ml-3">
+              {t("profile.myAddresses")}
+            </Text>
+            <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
+          </TouchableOpacity>
+
+          {/* --- YENİ DİL SEÇİM BUTONU --- */}
+          <TouchableOpacity
+            onPress={() => setModalVisible(true)}
+            className="flex-row items-center p-4 justify-between border-b border-gray-100"
+          >
             <View className="flex-row items-center">
               <Ionicons
                 name="language-outline"
@@ -116,16 +146,24 @@ export default function ProfileScreen() {
                 className="mr-3"
               />
               <Text className="text-gray-700 text-base ml-3">
-                {t("language")} ({isTurkish ? "TR" : "EN"})
+                {t("language")}
               </Text>
             </View>
-            <Switch
-              value={isTurkish}
-              onValueChange={toggleLanguage}
-              trackColor={{ false: "#e5e7eb", true: "#78350f" }}
-              thumbColor={"#fff"}
-            />
-          </View>
+
+            {/* Mevcut Dilin Bayrağı ve İsmi */}
+            <View className="flex-row items-center bg-gray-100 px-3 py-1 rounded-full">
+              <Text className="text-lg mr-2">{currentLang.flag}</Text>
+              <Text className="text-gray-600 font-bold text-xs">
+                {currentLang.name}
+              </Text>
+              <Ionicons
+                name="chevron-down"
+                size={12}
+                color="#6b7280"
+                style={{ marginLeft: 4 }}
+              />
+            </View>
+          </TouchableOpacity>
         </View>
 
         {/* Çıkış Butonu */}
@@ -143,6 +181,59 @@ export default function ProfileScreen() {
           v1.0.0 • Lupin Coffee App
         </Text>
       </ScrollView>
+
+      {/* --- DİL SEÇİM MODALI --- */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <TouchableOpacity
+          className="flex-1 bg-black/50 justify-center items-center"
+          activeOpacity={1}
+          onPress={() => setModalVisible(false)}
+        >
+          <View className="bg-white w-[80%] rounded-2xl p-4 shadow-xl">
+            <Text className="text-center font-bold text-lg mb-4 text-gray-800">
+              {t("language")}
+            </Text>
+
+            {LANGUAGES.map((lang) => (
+              <TouchableOpacity
+                key={lang.code}
+                onPress={() => changeLanguage(lang.code)}
+                className={`flex-row items-center p-4 border-b border-gray-100 ${
+                  i18n.language === lang.code ? "bg-amber-50 rounded-xl" : ""
+                }`}
+              >
+                <Text className="text-2xl mr-4">{lang.flag}</Text>
+                <Text
+                  className={`flex-1 text-base ${
+                    i18n.language === lang.code
+                      ? "font-bold text-amber-900"
+                      : "text-gray-700"
+                  }`}
+                >
+                  {lang.name}
+                </Text>
+                {i18n.language === lang.code && (
+                  <Ionicons name="checkmark-circle" size={24} color="#78350f" />
+                )}
+              </TouchableOpacity>
+            ))}
+
+            <TouchableOpacity
+              onPress={() => setModalVisible(false)}
+              className="mt-4 p-2 items-center"
+            >
+              <Text className="text-gray-500 font-bold">
+                {t("common.cancel")}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </SafeAreaView>
   );
 }

@@ -17,6 +17,7 @@ import {
 import { auth } from "../firebase/config"; // Dosya konumuna göre ../ sayısı değişebilir dikkat et
 import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
+import Toast from "react-native-toast-message";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -58,8 +59,11 @@ export default function LoginScreen() {
             // Yönlendirmeyi _layout yapacak
           })
           .catch((error) => {
-            Alert.alert("Giriş Hatası", error.message);
-            console.error(error);
+            Toast.show({
+              type: "error",
+              text1: "Giriş Hatası",
+              text2: error.message,
+            });
           });
       }
     }
@@ -70,13 +74,21 @@ export default function LoginScreen() {
     try {
       if (isRegistering) {
         await createUserWithEmailAndPassword(auth, email, password);
-        Alert.alert("Başarılı", "Hesap oluşturuldu");
+        Toast.show({
+          type: "success",
+          text1: "Başarılı",
+          text2: "Hesap oluşturuldu",
+        });
       } else {
         await signInWithEmailAndPassword(auth, email, password);
       }
       // Router replace yapmıyoruz, _layout otomatik algılayacak
     } catch (error: any) {
-      Alert.alert("Hata", error.message);
+      Toast.show({
+        type: "error",
+        text1: "Hata",
+        text2: error.message,
+      });
     } finally {
       setLoading(false);
     }

@@ -6,5 +6,73 @@
   "adminPanel": "Yönetici Paneli",
   "logout": "Çıkış Yap",
   "products": "Ürünler",
-  "orders": "Siparişlerim"
+  "common": {
+    "all": "Tümü",
+    "save": "Kaydet",
+    "cancel": "İptal",
+    "delete": "Sil",
+    "edit": "Düzenle",
+    "error": "Hata",
+    "success": "Başarılı"
+  },
+  "admin": {
+    "addProduct": "Yeni Ürün Ekle",
+    "productName": "Ürün Adı",
+    "price": "Fiyat",
+    "stock": "Stok",
+    "category": "Kategori",
+    "description": "Açıklama",
+    "image": "Ürün Görseli",
+    "pickImage": "Resim Seç",
+    "uploading": "Yükleniyor...",
+    "publish": "Ürünü Yayınla",
+    "fillAllFields": "Lütfen tüm alanları doldurun.",
+    "successMessage": "İşlem başarıyla tamamlandı.",
+    "selectCategory": "Kategori Seç",
+    "addNewCategory": "Yeni Kategori Ekle",
+    "categoryName": "Kategori Adı",
+    "add": "Ekle"
+  },
+  "checkout": {
+    "title": "Ödeme ve Teslimat",
+    "deliveryAddress": "Teslimat Adresi",
+    "addressTitle": "Adres Başlığı (Ev, İş)",
+    "city": "Şehir",
+    "district": "İlçe",
+    "fullAddress": "Tam Adres (Mahalle, Sokak, No...)",
+    "phone": "Telefon Numarası",
+    "orderSummary": "Sipariş Özeti",
+    "total": "Toplam Tutar",
+    "completeOrder": "Siparişi Tamamla",
+    "saveAddress": "Bu adresi profilime kaydet ve sonraki siparişlerde kullan",
+    "contracts": "Sözleşmeler",
+    "kvkkText": "Ön Bilgilendirme Koşulları'nı ve Mesafeli Satış Sözleşmesi'ni okudum, onaylıyorum.",
+    "fillAll": "Lütfen tüm adres bilgilerini doldurun.",
+    "acceptKvkk": "Lütfen sözleşmeleri onaylayın.",
+    "orderReceived": "Sipariş Alındı! ☕",
+    "orderMessage": "Sipariş Numarası: #{{number}}\nTeşekkür ederiz!",
+    "guestAlert": "Adres kaydetmek için lütfen giriş yapın."
+  },
+  "profile": {
+    "myAddresses": "Adres Bilgilerim",
+    "editAddress": "Adresi Düzenle",
+    "saveChanges": "Değişiklikleri Kaydet",
+    "addressUpdated": "Adres bilgileri başarıyla güncellendi."
+  },
+  "orders": {
+    "title": "Siparişlerim",
+    "orderNumber": "Sipariş No",
+    "orderDate": "Sipariş Tarihi",
+    "status": {
+      "pending": "Hazırlanıyor",
+      "shipped": "Kargoya Verildi",
+      "delivered": "Teslim Edildi",
+      "cancelled": "İptal Edildi"
+    },
+    "total": "Toplam",
+    "detailTitle": "Sipariş Detayı",
+    "items": "Ürünler",
+    "shippingInfo": "Teslimat Bilgileri",
+    "noOrders": "Henüz hiç siparişiniz yok."
+  }
 }

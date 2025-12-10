@@ -15,7 +15,8 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage"; // Storage 
 import { db, storage } from "../../firebase/config";
 import * as ImagePicker from "expo-image-picker"; // Resim seçici
 import { Ionicons } from "@expo/vector-icons";
-
+import Toast from "react-native-toast-message";
+import CategorySelector from "../../components/CategorySelector";
 export default function AddProductScreen() {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
@@ -69,21 +70,29 @@ export default function AddProductScreen() {
       console.log("Resim yüklendi:", downloadURL);
     } catch (error: any) {
       console.error(error);
-      Alert.alert("Hata", "Resim yüklenirken bir sorun oluştu.");
+      Toast.show({
+        type: "error",
+        text1: "Hata",
+        text2: "Resim yüklenirken bir sorun oluştu.",
+      });
     } finally {
       setUploadingImage(false);
     }
   };
 
   const handleCreate = async () => {
-    if (!form.title || !form.price)
-      return Alert.alert("Hata", "Başlık ve Fiyat zorunlu.");
-    if (!form.imageUrl)
-      return Alert.alert("Hata", "Lütfen bir resim yükleyin veya link girin.");
+    if (!form.title || !form.price) {
+      return Toast.show({
+        type: "error",
+        text1: "Eksik Bilgi",
+        text2: "Başlık ve Fiyat alanları zorunludur.",
+      });
+    }
 
     setSubmitting(true);
     try {
       await addDoc(collection(db, "products"), {
+        // ... veri alanları aynı kalsın ...
         title: form.title,
         price: parseFloat(form.price),
         currency: "TRY",
@@ -95,12 +104,32 @@ export default function AddProductScreen() {
         createdAt: Date.now(),
       });
 
-      Alert.alert("Harika", "Ürün başarıyla eklendi!", [
-        { text: "Tamam", onPress: () => router.back() },
-      ]);
+      // 1. GÜZEL BİLDİRİM
+      Toast.show({
+        type: "success",
+        text1: "Başarılı! 🎉",
+        text2: "Ürün sisteme eklendi, yönlendiriliyorsunuz...",
+        visibilityTime: 2000, // 2 saniye ekranda kalsın
+      });
+
+      // 2. YÖNLENDİRME (WEB FIX)
+      // Alert callback'ine güvenmek yerine setTimeout ile manuel yapıyoruz.
+      setTimeout(() => {
+        // router.back() yerine replace kullanarak Dashboard'a zorla git
+        // (admin)/dashboard rotasının tam adını yazıyoruz
+        if (router.canGoBack()) {
+          router.back();
+        } else {
+          router.replace("/(admin)/dashboard");
+        }
+      }, 1500); // Kullanıcı yeşil bildirimi görsün diye 1.5 sn bekle
     } catch (error) {
       console.error(error);
-      Alert.alert("Hata", "Ürün eklenemedi.");
+      Toast.show({
+        type: "error",
+        text1: "Hata",
+        text2: "Ürün eklenirken bir sorun oluştu.",
+      });
     } finally {
       setSubmitting(false);
     }
@@ -136,12 +165,9 @@ export default function AddProductScreen() {
         </View>
       </View>
 
-      <Text className="text-gray-500 mb-2 font-bold">Kategori</Text>
-      <TextInput
-        value={form.category}
-        onChangeText={(text) => setForm({ ...form, category: text })}
-        className="bg-gray-50 p-3 rounded-xl border border-gray-200 mb-4"
-        placeholder="coffee veya equipment"
+      <CategorySelector
+        selectedCategory={form.category}
+        onSelect={(category) => setForm({ ...form, category })}
       />
 
       {/* --- RESİM YÜKLEME ALANI (GÜNCELLENDİ) --- */}

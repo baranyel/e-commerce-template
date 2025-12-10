@@ -1,0 +1,319 @@
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  Switch,
+} from "react-native";
+import { useRouter } from "expo-router";
+import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
+import {
+  collection,
+  addDoc,
+  doc,
+  updateDoc,
+  writeBatch,
+  increment,
+} from "firebase/firestore";
+import { db } from "../firebase/config";
+import { Ionicons } from "@expo/vector-icons";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next"; // i18n
+import { UserProfile } from "../types";
+import Toast from "react-native-toast-message";
+import AddressSelector from "../components/AddressSelector";
+
+export default function CheckoutScreen() {
+  const router = useRouter();
+  const { t } = useTranslation(); // Çeviri kancası
+  const { cart, totalPrice, clearCart } = useCart();
+  const { user, userProfile } = useAuth(); // Profil verisini çekiyoruz
+
+  const [loading, setLoading] = useState(false);
+  const [kvkkAccepted, setKvkkAccepted] = useState(false); // Sözleşme onayı
+  const [saveAddressToProfile, setSaveAddressToProfile] = useState(true); // Adresi kaydetme isteği
+
+  // Form State
+  const [form, setForm] = useState({
+    title: "",
+    city: "",
+    district: "",
+    fullAddress: "",
+    phone: "",
+  });
+
+  // 1. Sayfa Açılınca Profilden Adresi Doldur (Auto-Fill)
+  useEffect(() => {
+    if (userProfile) {
+      setForm({
+        title: userProfile.addressTitle || "",
+        city: userProfile.city || "",
+        district: userProfile.district || "",
+        fullAddress: userProfile.fullAddress || "",
+        phone: userProfile.phone || "",
+      });
+    }
+  }, [userProfile]);
+
+  const handleOrder = async () => {
+    // 1. Validasyonlar (Aynı kalsın)
+    if (!form.fullAddress || !form.city || !form.phone) {
+      return Alert.alert(t("common.error"), t("checkout.fillAll"));
+    }
+
+    if (!kvkkAccepted) {
+      return Alert.alert(t("common.error"), t("checkout.acceptKvkk"));
+    }
+
+    setLoading(true);
+
+    try {
+      // 2. Profil Güncelleme (Aynı kalsın - Burası bağımsız çalışabilir)
+      if (saveAddressToProfile && user) {
+        const userRef = doc(db, "users", user.uid);
+        await updateDoc(userRef, {
+          addressTitle: form.title,
+          city: form.city,
+          district: form.district,
+          fullAddress: form.fullAddress,
+          phone: form.phone,
+        } as Partial<UserProfile>);
+      }
+
+      // --- BATCH (TOPLU) İŞLEM BAŞLIYOR ---
+      const batch = writeBatch(db);
+
+      // A) Sipariş Belgesini Hazırla
+      const orderNumber = Math.floor(
+        100000 + Math.random() * 900000
+      ).toString();
+      const newOrderRef = doc(collection(db, "orders")); // Yeni boş bir ID oluşturur
+
+      const orderData = {
+        id: newOrderRef.id, // ID'yi içine de yazalım
+        userId: user?.uid || "guest",
+        userEmail: user?.email || "guest",
+        items: cart,
+        totalAmount: totalPrice,
+        currency: "TRY",
+        status: "pending",
+        address: form,
+        createdAt: Date.now(),
+        orderNumber: orderNumber,
+      };
+
+      // Batch'e siparişi ekle
+      batch.set(newOrderRef, orderData);
+
+      // B) Ürünlerin Stoğunu Düşür
+      cart.forEach((item) => {
+        const productRef = doc(db, "products", item.id);
+
+        // increment(-miktar) komutu: Mevcut stok kaçsa, ondan miktar kadar düşer.
+        // Bu yöntem "Race Condition" (aynı anda alım) hatasını engeller.
+        batch.update(productRef, {
+          stock: increment(-item.quantity),
+        });
+      });
+
+      // C) Hepsini Tek Seferde Gönder (Atomik İşlem)
+      await batch.commit();
+
+      // --- İŞLEM BİTTİ ---
+
+      // 4. Temizlik
+      await clearCart(); // Async olduğu için await ekledik (Context'i güncellediysen)
+
+      Alert.alert(
+        t("checkout.orderReceived"),
+        t("checkout.orderMessage", { number: orderNumber }),
+        [
+          {
+            text: t("common.save"),
+            onPress: () => router.replace("/(tabs)/profile"),
+          },
+        ]
+      );
+    } catch (error) {
+      console.error("Sipariş Hatası:", error);
+      Alert.alert(
+        t("common.error"),
+        "Sipariş oluşturulamadı veya stok hatası."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (cart.length === 0) {
+    return (
+      <View className="flex-1 justify-center items-center bg-white">
+        <Text className="text-gray-500 mb-4">Sepetiniz boş.</Text>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          className="bg-amber-900 px-6 py-3 rounded-xl"
+        >
+          <Text className="text-white font-bold">Geri Dön</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  return (
+    <SafeAreaView className="flex-1 bg-gray-50">
+      {/* Header */}
+      <View className="flex-row items-center p-4 bg-white shadow-sm border-b border-gray-100">
+        <TouchableOpacity onPress={() => router.back()} className="mr-4">
+          <Ionicons name="arrow-back" size={24} color="black" />
+        </TouchableOpacity>
+        <Text className="text-xl font-bold text-gray-800">
+          {t("checkout.title")}
+        </Text>
+      </View>
+
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        className="flex-1"
+      >
+        <ScrollView className="p-4" showsVerticalScrollIndicator={false}>
+          {/* Adres Formu */}
+          <View className="bg-white p-4 rounded-xl shadow-sm mb-4 border border-gray-100">
+            <View className="flex-row items-center mb-4">
+              <Ionicons name="location-outline" size={20} color="#78350f" />
+              <Text className="font-bold text-gray-800 ml-2 text-lg">
+                {t("checkout.deliveryAddress")}
+              </Text>
+            </View>
+
+            <TextInput
+              placeholder={t("checkout.addressTitle")}
+              value={form.title}
+              onChangeText={(text) => setForm({ ...form, title: text })}
+              className="bg-gray-50 p-3 rounded-xl border border-gray-200 mb-3"
+            />
+
+            <AddressSelector
+              selectedCity={form.city}
+              selectedDistrict={form.district}
+              onCityChange={(city) => setForm({ ...form, city })}
+              onDistrictChange={(district) => setForm({ ...form, district })}
+            />
+
+            <TextInput
+              placeholder={t("checkout.fullAddress")}
+              value={form.fullAddress}
+              onChangeText={(text) => setForm({ ...form, fullAddress: text })}
+              multiline
+              numberOfLines={3}
+              className="bg-gray-50 p-3 rounded-xl border border-gray-200 mb-3 h-24"
+              textAlignVertical="top"
+            />
+
+            <TextInput
+              placeholder={t("checkout.phone")}
+              value={form.phone}
+              onChangeText={(text) => setForm({ ...form, phone: text })}
+              keyboardType="phone-pad"
+              className="bg-gray-50 p-3 rounded-xl border border-gray-200"
+            />
+
+            {/* Adresi Kaydet Switch */}
+            {user && (
+              <View className="flex-row items-center mt-4 pt-4 border-t border-gray-100 justify-between">
+                <Text className="text-gray-600 text-xs flex-1 mr-2">
+                  {t("checkout.saveAddress")}
+                </Text>
+                <Switch
+                  value={saveAddressToProfile}
+                  onValueChange={setSaveAddressToProfile}
+                  trackColor={{ false: "#e5e7eb", true: "#78350f" }}
+                />
+              </View>
+            )}
+          </View>
+
+          {/* Sözleşmeler (KVKK) */}
+          <View className="bg-white p-4 rounded-xl shadow-sm mb-4 border border-gray-100">
+            <Text className="font-bold text-gray-800 mb-2">
+              {t("checkout.contracts")}
+            </Text>
+            <TouchableOpacity
+              onPress={() => setKvkkAccepted(!kvkkAccepted)}
+              className="flex-row items-start"
+            >
+              <View
+                className={`w-6 h-6 rounded border mr-3 items-center justify-center ${
+                  kvkkAccepted
+                    ? "bg-amber-900 border-amber-900"
+                    : "border-gray-300 bg-white"
+                }`}
+              >
+                {kvkkAccepted && (
+                  <Ionicons name="checkmark" size={16} color="white" />
+                )}
+              </View>
+              <Text className="text-gray-600 text-xs flex-1 leading-5">
+                {t("checkout.kvkkText")}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Sipariş Özeti */}
+          <View className="bg-white p-4 rounded-xl shadow-sm mb-20 border border-gray-100">
+            <Text className="font-bold text-gray-800 mb-3 text-lg">
+              {t("checkout.orderSummary")}
+            </Text>
+            {cart.map((item) => (
+              <View key={item.id} className="flex-row justify-between mb-2">
+                <Text className="text-gray-600 flex-1" numberOfLines={1}>
+                  {item.quantity}x {item.title}
+                </Text>
+                <Text className="text-gray-800 font-bold">
+                  {item.price * item.quantity} TL
+                </Text>
+              </View>
+            ))}
+            <View className="h-[1px] bg-gray-200 my-3" />
+            <View className="flex-row justify-between">
+              <Text className="font-bold text-gray-900 text-lg">
+                {t("checkout.total")}
+              </Text>
+              <Text className="font-bold text-amber-900 text-lg">
+                {totalPrice} TL
+              </Text>
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+
+      {/* Alt Bar */}
+      <View className="p-4 bg-white border-t border-gray-100 shadow-lg safe-area-bottom">
+        <TouchableOpacity
+          onPress={handleOrder}
+          disabled={loading}
+          className={`p-4 rounded-xl flex-row justify-center items-center ${
+            loading ? "bg-gray-400" : "bg-green-700"
+          }`}
+        >
+          {loading ? (
+            <ActivityIndicator color="white" />
+          ) : (
+            <>
+              <Text className="text-white font-bold text-lg mr-2">
+                {t("checkout.completeOrder")}
+              </Text>
+              <Ionicons name="checkmark-circle" size={24} color="white" />
+            </>
+          )}
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
+  );
+}

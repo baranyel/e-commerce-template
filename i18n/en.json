@@ -6,5 +6,73 @@
   "adminPanel": "Admin Panel",
   "logout": "Log Out",
   "products": "Products",
-  "orders": "My Orders"
+  "common": {
+    "all": "All",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "error": "Error",
+    "success": "Success"
+  },
+  "admin": {
+    "addProduct": "Add New Product",
+    "productName": "Product Name",
+    "price": "Price",
+    "stock": "Stock",
+    "category": "Category",
+    "description": "Description",
+    "image": "Product Image",
+    "pickImage": "Pick Image",
+    "uploading": "Uploading...",
+    "publish": "Publish Product",
+    "fillAllFields": "Please fill all fields.",
+    "successMessage": "Operation completed successfully.",
+    "selectCategory": "Select Category",
+    "addNewCategory": "Add New Category",
+    "categoryName": "Category Name",
+    "add": "Add"
+  },
+  "checkout": {
+    "title": "Checkout & Delivery",
+    "deliveryAddress": "Delivery Address",
+    "addressTitle": "Address Title (Home, Work)",
+    "city": "City",
+    "district": "District",
+    "fullAddress": "Full Address",
+    "phone": "Phone Number",
+    "orderSummary": "Order Summary",
+    "total": "Total Amount",
+    "completeOrder": "Complete Order",
+    "saveAddress": "Save this address to my profile for future orders",
+    "contracts": "Contracts",
+    "kvkkText": "I have read and accept the Preliminary Information Conditions and Distance Sales Agreement.",
+    "fillAll": "Please fill in all address details.",
+    "acceptKvkk": "Please accept the agreements.",
+    "orderReceived": "Order Received! ☕",
+    "orderMessage": "Order Number: #{{number}}\nThank you!",
+    "guestAlert": "Please log in to save address."
+  },
+  "profile": {
+    "myAddresses": "My Addresses",
+    "editAddress": "Edit Address",
+    "saveChanges": "Save Changes",
+    "addressUpdated": "Address updated successfully."
+  },
+  "orders": {
+    "title": "My Orders",
+    "orderNumber": "Order No",
+    "orderDate": "Order Date",
+    "status": {
+      "pending": "Processing",
+      "shipped": "Shipped",
+      "delivered": "Delivered",
+      "cancelled": "Cancelled"
+    },
+    "total": "Total",
+    "detailTitle": "Order Details",
+    "items": "Items",
+    "shippingInfo": "Shipping Info",
+    "noOrders": "You have no orders yet."
+  }
 }

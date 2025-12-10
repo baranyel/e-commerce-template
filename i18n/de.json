@@ -1,0 +1,78 @@
+{
+  "welcome": "Willkommen",
+  "settings": "Einstellungen",
+  "language": "Sprache",
+  "darkMode": "Dunkelmodus",
+  "adminPanel": "Admin-Panel",
+  "logout": "Abmelden",
+  "products": "Produkte",
+  "common": {
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "error": "Fehler",
+    "success": "Erfolg",
+    "all": "Alle"
+  },
+  "admin": {
+    "addProduct": "Neues Produkt hinzufügen",
+    "productName": "Produktname",
+    "price": "Preis",
+    "stock": "Lagerbestand",
+    "category": "Kategorie",
+    "description": "Beschreibung",
+    "image": "Produktbild",
+    "pickImage": "Bild auswählen",
+    "uploading": "Wird hochgeladen...",
+    "publish": "Veröffentlichen",
+    "fillAllFields": "Bitte füllen Sie alle Felder aus.",
+    "successMessage": "Vorgang erfolgreich abgeschlossen.",
+    "selectCategory": "Kategorie auswählen",
+    "addNewCategory": "Neue Kategorie hinzufügen",
+    "categoryName": "Kategoriename",
+    "add": "Hinzufügen"
+  },
+  "checkout": {
+    "title": "Kasse & Lieferung",
+    "deliveryAddress": "Lieferadresse",
+    "addressTitle": "Adresstitel (Zuhause, Arbeit)",
+    "city": "Stadt",
+    "district": "Bezirk",
+    "fullAddress": "Vollständige Adresse",
+    "phone": "Telefonnummer",
+    "orderSummary": "Bestellübersicht",
+    "total": "Gesamtbetrag",
+    "completeOrder": "Bestellung abschließen",
+    "saveAddress": "Adresse für zukünftige Bestellungen speichern",
+    "contracts": "Verträge",
+    "kvkkText": "Ich habe die Vorinformationsbedingungen und den Fernabsatzvertrag gelesen und akzeptiere sie.",
+    "fillAll": "Bitte füllen Sie alle Adressdaten aus.",
+    "acceptKvkk": "Bitte akzeptieren Sie die Verträge.",
+    "orderReceived": "Bestellung erhalten! ☕",
+    "orderMessage": "Bestellnummer: #{{number}}\nVielen Dank!",
+    "guestAlert": "Bitte melden Sie sich an, um die Adresse zu speichern."
+  },
+  "profile": {
+    "myAddresses": "Meine Adressen",
+    "editAddress": "Adresse bearbeiten",
+    "saveChanges": "Änderungen speichern",
+    "addressUpdated": "Adresse erfolgreich aktualisiert."
+  },
+  "orders": {
+    "title": "Meine Bestellungen",
+    "orderNumber": "Bestell-Nr",
+    "orderDate": "Bestelldatum",
+    "status": {
+      "pending": "Wird bearbeitet",
+      "shipped": "Versandt",
+      "delivered": "Geliefert",
+      "cancelled": "Storniert"
+    },
+    "total": "Gesamt",
+    "detailTitle": "Bestelldetails",
+    "items": "Artikel",
+    "shippingInfo": "Versandinformationen",
+    "noOrders": "Sie haben noch keine Bestellungen."
+  }
+}

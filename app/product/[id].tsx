@@ -55,7 +55,7 @@ export default function ProductDetailScreen() {
       </View>
     );
   }
-
+  const isOutOfStock = product.stock <= 0;
   return (
     <>
       <Stack.Screen
@@ -86,20 +86,31 @@ export default function ProductDetailScreen() {
           </View>
         </ScrollView>
 
-        {/* Alt Bar (Fiyat ve Buton) */}
+        {/* Alt Bar */}
         <View className="p-4 border-t border-gray-100 flex-row items-center justify-between bg-white safe-area-bottom">
           <View>
             <Text className="text-gray-400 text-xs">Toplam Fiyat</Text>
             <Text className="text-2xl font-bold text-gray-900">
               {product.price} {product.currency}
             </Text>
+            {/* Stok Bilgisi Göster */}
+            {isOutOfStock ? (
+              <Text className="text-red-600 text-xs font-bold mt-1">
+                TÜKENDİ
+              </Text>
+            ) : (
+              <Text className="text-gray-500 text-xs mt-1">
+                Stok: {product.stock}
+              </Text>
+            )}
           </View>
 
           <TouchableOpacity
-            onPress={() => {
-              addToCart(product);
-            }}
-            className="bg-amber-900 px-8 py-4 rounded-xl flex-row items-center"
+            onPress={() => addToCart(product)}
+            disabled={isOutOfStock} // Stok yoksa tıklanmasın
+            className={`px-8 py-4 rounded-xl flex-row items-center ${
+              isOutOfStock ? "bg-gray-300" : "bg-amber-900" // Stok yoksa gri, varsa kahve rengi
+            }`}
           >
             <Ionicons
               name="cart"
@@ -107,7 +118,9 @@ export default function ProductDetailScreen() {
               color="white"
               style={{ marginRight: 8 }}
             />
-            <Text className="text-white font-bold text-lg">Sepete Ekle</Text>
+            <Text className="text-white font-bold text-lg">
+              {isOutOfStock ? "Stokta Yok" : "Sepete Ekle"}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>

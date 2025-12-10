@@ -9,7 +9,13 @@ import {
   RefreshControl,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { collection, getDocs, query, orderBy } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  query,
+  orderBy,
+  onSnapshot,
+} from "firebase/firestore";
 import { db } from "../../firebase/config";
 import { seedDatabase } from "../../firebase/seed"; // Seed fonksiyonunu al
 import { Product } from "../../types";
@@ -26,33 +32,43 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
 
   // Verileri Firebase'den Çekme Fonksiyonu
-  const fetchProducts = async () => {
-    try {
-      // 'products' koleksiyonundan verileri al
-      const q = query(collection(db, "products"), orderBy("createdAt", "desc"));
-      const querySnapshot = await getDocs(q);
-
-      const fetchedProducts: Product[] = [];
-      querySnapshot.forEach((doc) => {
-        fetchedProducts.push(doc.data() as Product);
-      });
-
-      setProducts(fetchedProducts);
-    } catch (error) {
-      console.error("Veri çekme hatası:", error);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
-
   useEffect(() => {
-    fetchProducts();
+    setLoading(true);
+
+    // Veritabanını canlı dinle
+    const q = query(collection(db, "products"), orderBy("createdAt", "desc"));
+
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const fetchedProducts: Product[] = [];
+        snapshot.forEach((doc) => {
+          fetchedProducts.push({
+            ...doc.data(),
+            id: doc.id,
+          } as Product);
+        });
+
+        setProducts(fetchedProducts);
+        setLoading(false);
+        setRefreshing(false); // Refresh ediliyorsa durdur
+      },
+      (error) => {
+        console.error("Veri çekme hatası:", error);
+        setLoading(false);
+      }
+    );
+
+    // Sayfadan çıkınca dinlemeyi bırak
+    return () => unsubscribe();
   }, []);
 
+  // onRefresh fonksiyonunu da güncelle (Sadece loading state'ini tetiklesin yeter, onSnapshot zaten güncel)
   const onRefresh = () => {
     setRefreshing(true);
-    fetchProducts();
+    // onSnapshot zaten canlı olduğu için ekstra bir şey yapmaya gerek yok ama
+    // kullanıcı hissiyatı için 1 saniye bekletip kapatabiliriz.
+    setTimeout(() => setRefreshing(false), 1000);
   };
 
   // Tekil Ürün Kartı Bileşeni (Render Item)
