@@ -13,7 +13,11 @@
     "delete": "Sil",
     "edit": "Düzenle",
     "error": "Hata",
-    "success": "Başarılı"
+    "success": "Başarılı",
+    "minPrice": "Min Fiyat",
+    "maxPrice": "Max Fiyat",
+    "filter": "Filtrele",
+    "currency": "₺"
   },
   "admin": {
     "addProduct": "Yeni Ürün Ekle",
@@ -64,7 +68,8 @@
     "orderNumber": "Sipariş No",
     "orderDate": "Sipariş Tarihi",
     "status": {
-      "pending": "Hazırlanıyor",
+      "pending": "Sipariş Alındı",
+      "preparing": "Hazırlanıyor",
       "shipped": "Kargoya Verildi",
       "delivered": "Teslim Edildi",
       "cancelled": "İptal Edildi"
@@ -74,5 +79,27 @@
     "items": "Ürünler",
     "shippingInfo": "Teslimat Bilgileri",
     "noOrders": "Henüz hiç siparişiniz yok."
+  },
+  "adminOrders": {
+    "title": "Sipariş Yönetimi",
+    "activeOrders": "Aktif Siparişler",
+    "archive": "Sipariş Arşivi",
+    "markAsShipped": "Kargoya Ver",
+    "markAsDelivered": "Teslim Edildi İşaretle",
+    "cancelOrder": "Siparişi İptal Et",
+    "trackingUrl": "Kargo Takip Linki",
+    "trackingUrlPlaceholder": "https://kargo.com/takip/123...",
+    "enterTracking": "Kargo Takip Bilgisi",
+    "enterTrackingDesc": "Müşterinin siparişi takip edebilmesi için link giriniz.",
+    "filter": "Filtrele",
+    "startDate": "Başlangıç Tarihi",
+    "endDate": "Bitiş Tarihi",
+    "minPrice": "Min Tutar",
+    "maxPrice": "Max Tutar",
+    "apply": "Uygula",
+    "clear": "Temizle",
+    "customer": "Müşteri",
+    "address": "Adres",
+    "items": "Ürünler"
   }
 }

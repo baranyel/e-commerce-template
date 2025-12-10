@@ -240,6 +240,7 @@ export default function AdminDashboard() {
   return (
     <View className="flex-1 bg-gray-50">
       {/* --- ÜST PANEL (Search & Filter) --- */}
+
       <View className="bg-white p-4 pb-2 shadow-sm z-10">
         {/* Arama Barı */}
         <View className="flex-row items-center bg-gray-100 rounded-xl px-4 py-2 mb-3">
@@ -257,6 +258,22 @@ export default function AdminDashboard() {
           )}
         </View>
 
+        <View className="flex-row justify-between items-center mb-4">
+          <Text className="text-xl font-bold text-gray-800">
+            {t(`products`)}
+          </Text>
+
+          {/* Sipariş Yönetimi Butonu */}
+          <TouchableOpacity
+            onPress={() => router.push("/(admin)/orders")}
+            className="bg-amber-100 px-4 py-2 rounded-lg flex-row items-center border border-amber-200"
+          >
+            <Ionicons name="receipt" size={18} color="#78350f" />
+            <Text className="text-amber-900 font-bold ml-2 text-xs">
+              {t(`adminOrders.title`)}
+            </Text>
+          </TouchableOpacity>
+        </View>
         {/* --- DİNAMİK FİLTRELER (DEĞİŞEN KISIM) --- */}
         <View className="flex-row justify-between items-center mb-2">
           {/* ScrollView kullanıyoruz ki kategoriler taşarsa kaydırılabilsin */}
@@ -286,7 +303,6 @@ export default function AdminDashboard() {
               </TouchableOpacity>
             )}
           />
-
           <TouchableOpacity
             onPress={() => setIsGridLayout(!isGridLayout)}
             className="p-2 bg-gray-100 rounded-lg ml-2"

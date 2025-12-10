@@ -22,12 +22,25 @@ import { useAuth } from "../context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 
+import Colors from "@/constants/Colors";
+import { useColorScheme } from "@/components/useColorScheme";
+import { useClientOnlyValue } from "@/components/useClientOnlyValue";
+
 export default function OrdersScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const { user } = useAuth();
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const colorScheme = useColorScheme();
+
+  // Renk Ayarları
+  // Dış taraf (Boşluklar): Açık modda Gri (#F3F4F6), Koyu modda Tam Siyah
+  const outerBackgroundColor = colorScheme === "dark" ? "#000000" : "#f5f5f5";
+
+  // İç taraf (İçerik): Açık modda Beyaz, Koyu modda Koyu Gri/Siyah
+  const innerBackgroundColor = Colors[colorScheme ?? "light"].background;
 
   useEffect(() => {
     // Kullanıcı yoksa işlem yapma
@@ -117,51 +130,67 @@ export default function OrdersScreen() {
       t(statusLabel) !== statusLabel ? t(statusLabel) : item.status;
 
     return (
-      <TouchableOpacity
-        onPress={() => router.push(`/order-detail/${item.id}` as any)}
-        className="bg-white p-4 rounded-xl mb-3 shadow-sm border border-gray-100"
-      >
-        <View className="flex-row justify-between items-start mb-2">
-          <View>
-            <Text className="text-xs text-gray-500 font-bold uppercase">
-              {t("orders.orderNumber")}
-            </Text>
-            <Text className="text-gray-900 font-bold text-base">
-              #{item.orderNumber}
-            </Text>
-          </View>
-          <View
-            className={`px-3 py-1 rounded-full ${
-              getStatusInfo(item.status).color
-            }`}
+      <View style={{ flex: 1, backgroundColor: outerBackgroundColor }}>
+        <View
+          style={{
+            flex: 1,
+            width: "100%",
+            maxWidth: 1200,
+            alignSelf: "center",
+            // Web'de kenarlarda gölge olsun istersen bunu açabilirsin:
+            // shadowColor: "#000", shadowOpacity: 0.1, shadowRadius: 10, elevation: 5
+          }}
+        >
+          {" "}
+          <TouchableOpacity
+            onPress={() => router.push(`/order-detail/${item.id}` as any)}
+            className="bg-white p-4 rounded-xl mb-3 shadow-sm border border-gray-100"
           >
-            <Text
-              className={`text-xs font-bold ${getStatusInfo(item.status).text}`}
-            >
-              {translatedStatus}
-            </Text>
-          </View>
-        </View>
+            <View className="flex-row justify-between items-start mb-2">
+              <View>
+                <Text className="text-xs text-gray-500 font-bold uppercase">
+                  {t("orders.orderNumber")}
+                </Text>
+                <Text className="text-gray-900 font-bold text-base">
+                  #{item.orderNumber}
+                </Text>
+              </View>
+              <View
+                className={`px-3 py-1 rounded-full ${
+                  getStatusInfo(item.status).color
+                }`}
+              >
+                <Text
+                  className={`text-xs font-bold ${
+                    getStatusInfo(item.status).text
+                  }`}
+                >
+                  {translatedStatus}
+                </Text>
+              </View>
+            </View>
 
-        <View className="h-[1px] bg-gray-100 my-2" />
+            <View className="h-[1px] bg-gray-100 my-2" />
 
-        <View className="flex-row justify-between items-center">
-          <View>
-            <Text className="text-xs text-gray-400">
-              {t("orders.orderDate")}
-            </Text>
-            <Text className="text-gray-600 text-sm">{date}</Text>
-          </View>
-          <View>
-            <Text className="text-xs text-gray-400 text-right">
-              {t("orders.total")}
-            </Text>
-            <Text className="text-amber-900 font-bold text-lg">
-              {item.totalAmount} TL
-            </Text>
-          </View>
+            <View className="flex-row justify-between items-center">
+              <View>
+                <Text className="text-xs text-gray-400">
+                  {t("orders.orderDate")}
+                </Text>
+                <Text className="text-gray-600 text-sm">{date}</Text>
+              </View>
+              <View>
+                <Text className="text-xs text-gray-400 text-right">
+                  {t("orders.total")}
+                </Text>
+                <Text className="text-amber-900 font-bold text-lg">
+                  {item.totalAmount} TL
+                </Text>
+              </View>
+            </View>
+          </TouchableOpacity>
         </View>
-      </TouchableOpacity>
+      </View>
     );
   };
 

@@ -13,7 +13,11 @@
     "delete": "Delete",
     "edit": "Edit",
     "error": "Error",
-    "success": "Success"
+    "success": "Success",
+    "minPrice": "Min Price",
+    "maxPrice": "Max Price",
+    "filter": "Filter",
+    "currency": "₺"
   },
   "admin": {
     "addProduct": "Add New Product",
@@ -64,15 +68,38 @@
     "orderNumber": "Order No",
     "orderDate": "Order Date",
     "status": {
-      "pending": "Processing",
-      "shipped": "Shipped",
-      "delivered": "Delivered",
-      "cancelled": "Cancelled"
+      "pending": "Sipariş Alındı",
+      "preparing": "Hazırlanıyor",
+      "shipped": "Kargoya Verildi",
+      "delivered": "Teslim Edildi",
+      "cancelled": "İptal Edildi"
     },
     "total": "Total",
     "detailTitle": "Order Details",
     "items": "Items",
     "shippingInfo": "Shipping Info",
     "noOrders": "You have no orders yet."
+  },
+  "adminOrders": {
+    "title": "Order Management",
+    "activeOrders": "Active Orders",
+    "archive": "Order Archive",
+    "markAsShipped": "Mark as Shipped",
+    "markAsDelivered": "Mark as Delivered",
+    "cancelOrder": "Cancel Order",
+    "trackingUrl": "Tracking URL",
+    "trackingUrlPlaceholder": "https://shipping.com/track/123...",
+    "enterTracking": "Shipping Info",
+    "enterTrackingDesc": "Enter tracking link for the customer.",
+    "filter": "Filter",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "minPrice": "Min Price",
+    "maxPrice": "Max Price",
+    "apply": "Apply",
+    "clear": "Clear",
+    "customer": "Customer",
+    "address": "Address",
+    "items": "Items"
   }
 }
