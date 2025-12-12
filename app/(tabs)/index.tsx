@@ -3,12 +3,13 @@ import {
   View,
   Text,
   FlatList,
-  Image,
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+// import { SafeAreaView } from "react-native-safe-area-context"; // Removed
+import { ScreenWrapper } from "../../components/ui/ScreenWrapper";
+import { ProductCard } from "../../components/ui/ProductCard";
 import {
   collection,
   getDocs,
@@ -71,41 +72,20 @@ export default function HomeScreen() {
     setTimeout(() => setRefreshing(false), 1000);
   };
 
-  // Tekil Ürün Kartı Bileşeni (Render Item)
+  // Tekil Ürün Kartı Bileşeni (Refactored)
   const renderProductItem = ({ item }: { item: Product }) => (
-    <TouchableOpacity
+    <ProductCard
+      item={item}
+      layout="grid"
       onPress={() => router.push(`/product/${item.id}` as any)}
-      className="flex-1 m-2 bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100"
-    >
-      <Image
-        source={{ uri: item.images[0] }}
-        className="w-full h-40 object-cover"
-      />
-      <View className="p-3">
-        {/* ... diğer textler ... */}
-
-        <View className="flex-row justify-between items-center mt-2">
-          <Text className="text-amber-800 font-bold text-base">
-            {item.price} {item.currency}
-          </Text>
-
-          {/* Ana sayfadan direkt eklemek için buton */}
-          <TouchableOpacity
-            onPress={() => addToCart(item)} // Tıklanınca sepete atar
-            className="bg-amber-100 p-2 rounded-full"
-          >
-            {/* İkon kullanmak için @expo/vector-icons ekleyebilirsin veya Text kalsın */}
-            <Text className="text-amber-800 font-bold text-xs">+</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </TouchableOpacity>
+      onAddToCart={(product) => addToCart(product)}
+    />
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
+    <ScreenWrapper>
       {/* Üst Başlık */}
-      <View className="px-4 py-3 flex-row justify-between items-center bg-white shadow-sm">
+      <View className="px-4 py-3 flex-row justify-between items-center bg-white shadow-sm w-full">
         <View>
           <Text className="text-gray-400 text-xs">Hoşgeldin,</Text>
           <Text className="text-amber-900 font-bold text-xl">
@@ -150,6 +130,6 @@ export default function HomeScreen() {
           }
         />
       )}
-    </SafeAreaView>
+    </ScreenWrapper>
   );
 }

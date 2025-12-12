@@ -3,13 +3,14 @@ import {
   View,
   Text,
   FlatList,
-  Image,
   TouchableOpacity,
   Alert,
   ActivityIndicator,
   TextInput,
   Platform,
 } from "react-native";
+import { ScreenWrapper } from "../../components/ui/ScreenWrapper";
+import { ProductCard } from "../../components/ui/ProductCard";
 import {
   collection,
   deleteDoc,
@@ -120,125 +121,23 @@ export default function AdminDashboard() {
     ]);
   };
 
-  // Kart Bileşeni
+  // Kart Bileşeni (Refactored)
   const renderItem = ({ item }: { item: Product }) => {
-    // Kritik Stok Kontrolü (5'ten azsa kırmızı yap)
-    const isLowStock = item.stock < 5;
-
-    if (isGridLayout) {
-      // --- IZGARA GÖRÜNÜMÜ (Kartlar) ---
-      return (
-        <View className="flex-1 m-2 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden relative">
-          {/* Stok Uyarısı (Köşede) */}
-          {isLowStock && (
-            <View className="absolute top-2 right-2 z-10 bg-red-100 px-2 py-1 rounded-md">
-              <Text className="text-red-600 text-[10px] font-bold">
-                STOK AZ
-              </Text>
-            </View>
-          )}
-
-          <Image
-            source={{
-              uri: item.images[0] || "https://via.placeholder.com/150",
-            }}
-            className="w-full h-32 object-cover bg-gray-100"
-          />
-
-          <View className="p-3">
-            <Text
-              className="font-bold text-gray-800 text-sm mb-1"
-              numberOfLines={1}
-            >
-              {item.title}
-            </Text>
-            <View className="flex-row justify-between items-center mb-2">
-              <Text className="text-amber-800 font-bold text-xs">
-                {item.price} TL
-              </Text>
-              <Text
-                className={`text-xs ${
-                  isLowStock ? "text-red-500 font-bold" : "text-gray-400"
-                }`}
-              >
-                Stok: {item.stock}
-              </Text>
-            </View>
-
-            {/* Butonlar (Yan Yana) */}
-            <View className="flex-row space-x-2 mt-1">
-              <TouchableOpacity
-                onPress={() => router.push(`/edit/${item.id}` as any)}
-                className="flex-1 bg-blue-50 py-2 rounded-lg items-center"
-              >
-                <Ionicons name="create" size={16} color="#2563eb" />
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => handleDelete(item.id)}
-                className="flex-1 bg-red-50 py-2 rounded-lg items-center"
-              >
-                <Ionicons name="trash" size={16} color="#dc2626" />
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      );
-    } else {
-      // --- LİSTE GÖRÜNÜMÜ (Satırlar) ---
-      return (
-        <View className="flex-row bg-white p-3 mb-3 rounded-xl shadow-sm border border-gray-100 items-center">
-          <Image
-            source={{
-              uri: item.images[0] || "https://via.placeholder.com/100",
-            }}
-            className="w-16 h-16 rounded-lg bg-gray-100"
-          />
-
-          <View className="flex-1 ml-3 mr-2">
-            <View className="flex-row justify-between">
-              <Text
-                className="font-bold text-gray-800 text-base flex-1"
-                numberOfLines={1}
-              >
-                {item.title}
-              </Text>
-              {isLowStock && (
-                <Text className="text-red-500 text-xs font-bold ml-2">
-                  KRİTİK STOK
-                </Text>
-              )}
-            </View>
-
-            <Text className="text-gray-500 text-xs mt-1">
-              {item.category} • {item.stock} Adet
-            </Text>
-            <Text className="text-amber-800 font-bold mt-1">
-              {item.price} {item.currency}
-            </Text>
-          </View>
-
-          <View className="flex-row items-center space-x-2">
-            <TouchableOpacity
-              onPress={() => router.push(`/edit/${item.id}` as any)}
-              className="p-2 bg-blue-50 rounded-lg"
-            >
-              <Ionicons name="create-outline" size={20} color="#2563eb" />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => handleDelete(item.id)}
-              className="p-2 bg-red-50 rounded-lg"
-            >
-              <Ionicons name="trash-outline" size={20} color="#dc2626" />
-            </TouchableOpacity>
-          </View>
-        </View>
-      );
-    }
+    return (
+        <ProductCard
+            item={item}
+            layout={isGridLayout ? "grid" : "list"}
+            isAdmin
+            onPress={() => {}} // Admin modunda karta tıklayınca bir şey olmuyor genelde, ya da detay?
+            onEdit={(product) => router.push(`/edit/${product.id}` as any)}
+            onDelete={(product) => handleDelete(product.id)}
+        />
+    );
   };
 
   return (
-    <View className="flex-1 bg-gray-50">
+    <ScreenWrapper>
+
       {/* --- ÜST PANEL (Search & Filter) --- */}
       <View className="bg-white p-4 pb-2 shadow-sm z-10">
         {/* Arama Barı */}
@@ -327,6 +226,6 @@ export default function AdminDashboard() {
       >
         <Ionicons name="add" size={30} color="white" />
       </TouchableOpacity>
-    </View>
+    </ScreenWrapper>
   );
 }

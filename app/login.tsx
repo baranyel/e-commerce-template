@@ -28,10 +28,16 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
 
+
+
+
+
   const [request, response, promptAsync] = Google.useAuthRequest({
     // iosClientId: "...",
     // androidClientId: "..."
     webClientId:
+
+    
       "1060679330394-grtbngtlmodrru1nfcguuj2aotbbcum3.apps.googleusercontent.com",
   });
 

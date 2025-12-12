@@ -5,10 +5,10 @@ import {
   TextInput,
   TouchableOpacity,
   FlatList,
-  Image,
   ActivityIndicator,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { ScreenWrapper } from "../../components/ui/ScreenWrapper";
+import { ProductCard } from "../../components/ui/ProductCard";
 import { Ionicons } from "@expo/vector-icons";
 import { collection, query, orderBy, onSnapshot } from "firebase/firestore"; // onSnapshot ekle
 import { db } from "../../firebase/config";
@@ -98,79 +98,22 @@ export default function SearchScreen() {
     setFilteredProducts(result);
   }, [searchQuery, selectedCategory, allProducts]);
 
-  // ... renderItem fonksiyonu AYNI KALSIN ...
+  // ... renderItem fonksiyonu REFACTORED ...
   // (Sadece renderItem içindeki tasarımı değiştirmedik)
   const renderItem = ({ item }: { item: Product }) => {
-    // ... burası eski kodundakiyle aynı ...
-    // Kopyalamaya gerek yok, sadece return içindeki map kısmını değiştireceğiz.
-    if (isGridLayout) {
-      return (
-        <TouchableOpacity
-          onPress={() => router.push(`/product/${item.id}` as any)}
-          className="flex-1 m-2 bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden"
-        >
-          <Image
-            source={{ uri: item.images[0] }}
-            className="w-full h-36 object-cover"
-          />
-          <View className="p-3">
-            <Text
-              className="text-gray-900 font-bold text-sm mb-1"
-              numberOfLines={1}
-            >
-              {item.title}
-            </Text>
-            <Text className="text-amber-800 font-bold text-xs">
-              {item.price} {item.currency}
-            </Text>
-          </View>
-        </TouchableOpacity>
-      );
-    } else {
-      return (
-        <TouchableOpacity
-          onPress={() => router.push(`/product/${item.id}` as any)}
-          className="flex-row mb-3 bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden p-3"
-        >
-          <Image
-            source={{ uri: item.images[0] }}
-            className="w-24 h-24 rounded-lg bg-gray-100"
-          />
-          <View className="flex-1 ml-4 justify-between py-1">
-            <View>
-              <Text className="text-xs text-amber-800 font-bold uppercase mb-1">
-                {item.category}
-              </Text>
-              <Text className="text-gray-900 font-bold text-lg">
-                {item.title}
-              </Text>
-              <Text className="text-gray-500 text-xs mt-1" numberOfLines={2}>
-                {item.description}
-              </Text>
-            </View>
-            <View className="flex-row justify-between items-center mt-2">
-              <Text className="text-lg font-bold text-gray-900">
-                {item.price} {item.currency}
-              </Text>
-              <TouchableOpacity
-                onPress={(e) => {
-                  e.stopPropagation();
-                  addToCart(item);
-                }}
-                className="bg-amber-100 px-3 py-1 rounded-full"
-              >
-                <Text className="text-amber-900 font-bold text-xs">Ekle +</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </TouchableOpacity>
-      );
-    }
+     return (
+        <ProductCard
+            item={item}
+            layout={isGridLayout ? "grid" : "list"}
+            onPress={() => router.push(`/product/${item.id}` as any)}
+            onAddToCart={(product) => addToCart(product)}
+        />
+     );
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      <View className="p-4 bg-white shadow-sm z-10">
+    <ScreenWrapper>
+      <View className="p-4 bg-white shadow-sm z-10 w-full">
         {/* Arama Barı - AYNI */}
         <View className="flex-row items-center bg-gray-100 rounded-xl px-4 py-3 mb-4">
           <Ionicons name="search" size={20} color="#9ca3af" />
@@ -248,6 +191,6 @@ export default function SearchScreen() {
           </View>
         }
       />
-    </SafeAreaView>
+    </ScreenWrapper>
   );
 }

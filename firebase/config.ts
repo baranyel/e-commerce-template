@@ -5,7 +5,7 @@ import {
   getAuth,
   // @ts-ignore
   getReactNativePersistence,
-  Auth, // <--- BURAYA EKLE
+  Auth,
 } from "firebase/auth";
 import { getFirestore, initializeFirestore } from "firebase/firestore"; // initializeFirestore ekle
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -24,7 +24,7 @@ const firebaseConfig = {
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
 // 2. DEĞİŞİKLİK: Değişkenin tipini belirt
-let auth: Auth; // <--- SADECE 'let auth;' YAZAN YERİ BU ŞEKİLDE DEĞİŞTİR
+let auth: Auth;
 
 if (Platform.OS === "web") {
   if (typeof window === "undefined") {

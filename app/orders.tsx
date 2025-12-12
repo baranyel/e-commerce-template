@@ -8,7 +8,8 @@ import {
   Alert,
   Clipboard,
 } from "react-native"; // Clipboard eklendi
-import { SafeAreaView } from "react-native-safe-area-context";
+// import { SafeAreaView } from "react-native-safe-area-context";
+import { ScreenWrapper } from "../components/ui/ScreenWrapper";
 import { useRouter } from "expo-router";
 import {
   collection,
@@ -166,8 +167,8 @@ export default function OrdersScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      <View className="flex-row items-center p-4 bg-white shadow-sm border-b border-gray-100">
+    <ScreenWrapper>
+      <View className="flex-row items-center p-4 bg-white shadow-sm border-b border-gray-100 w-full">
         <TouchableOpacity onPress={() => router.back()} className="mr-4">
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
@@ -192,6 +193,6 @@ export default function OrdersScreen() {
           }
         />
       )}
-    </SafeAreaView>
+    </ScreenWrapper>
   );
 }
