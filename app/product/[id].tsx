@@ -14,11 +14,13 @@ import { Product } from "../../types";
 import { useCart } from "../../context/CartContext";
 import { Ionicons } from "@expo/vector-icons";
 
+import { useTranslation } from "react-i18next";
 import Colors from "@/constants/Colors";
 import { useColorScheme } from "@/components/useColorScheme";
 import { useClientOnlyValue } from "@/components/useClientOnlyValue";
 
 export default function ProductDetailScreen() {
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const { addToCart } = useCart();
@@ -112,18 +114,18 @@ export default function ProductDetailScreen() {
           {/* Alt Bar */}
           <View className="p-4 border-t border-gray-100 flex-row items-center justify-between bg-white safe-area-bottom">
             <View>
-              <Text className="text-gray-400 text-xs">Toplam Fiyat</Text>
+              <Text className="text-gray-400 text-xs">{t("product.totalPrice")}</Text>
               <Text className="text-2xl font-bold text-gray-900">
                 {product.price} {product.currency}
               </Text>
               {/* Stok Bilgisi Göster */}
               {isOutOfStock ? (
                 <Text className="text-red-600 text-xs font-bold mt-1">
-                  TÜKENDİ
+                  {t("product.outOfStock")}
                 </Text>
               ) : (
                 <Text className="text-gray-500 text-xs mt-1">
-                  Stok: {product.stock}
+                  {t("product.stock")}: {product.stock}
                 </Text>
               )}
             </View>
@@ -142,7 +144,7 @@ export default function ProductDetailScreen() {
                 style={{ marginRight: 8 }}
               />
               <Text className="text-white font-bold text-lg">
-                {isOutOfStock ? "Stokta Yok" : "Sepete Ekle"}
+                {isOutOfStock ? t("product.outOfStock") : t("product.addToCart")}
               </Text>
             </TouchableOpacity>
           </View>

@@ -6,6 +6,11 @@
   "adminPanel": "Admin Panel",
   "logout": "Log Out",
   "products": "Products",
+  "tabs": {
+    "home": "Home",
+    "explore": "Explore",
+    "profile": "Profile"
+  },
   "common": {
     "all": "All",
     "save": "Save",
@@ -17,7 +22,8 @@
     "minPrice": "Min Price",
     "maxPrice": "Max Price",
     "filter": "Filter",
-    "currency": "₺"
+    "currency": "₺",
+    "or": "or"
   },
   "admin": {
     "addProduct": "Add New Product",
@@ -35,11 +41,50 @@
     "selectCategory": "Select Category",
     "addNewCategory": "Add New Category",
     "categoryName": "Category Name",
-    "add": "Add"
+    "add": "Add",
+    "dashboard": {
+      "totalRevenue": "Total Revenue",
+      "todaysRevenue": "Today's Revenue",
+      "activeOrders": "Active Orders",
+      "totalUsers": "Total Users",
+      "lowStock": "Low Stock",
+      "topSelling": "Top Selling",
+      "recentActivity": "Recent Activity",
+      "quickActions": "Quick Actions",
+      "newProduct": "Add Product",
+      "viewOrders": "View Orders",
+      "salesTrend": "Weekly Sales Trend",
+      "viewProfile": "Go to Profile",
+      "attributes": "Manage Attributes"
+    },
+    "adminProducts": {
+      "title": "Product Management",
+      "active": "Active",
+      "inactive": "Hidden",
+      "search": "Search Products...",
+      "status": "Status",
+      "statusUpdated": "Product status updated",
+      "empty": "No products found."
+    },
+    "attribute": {
+      "title": "Attribute Management",
+      "create": "New Attribute",
+      "name": "Attribute Name",
+      "type": "Type",
+      "hierarchical": "Is Hierarchical?",
+      "active": "Is Active?",
+      "terms": "Terms",
+      "addTerm": "Add Term",
+      "rootTerm": "Add Root Term",
+      "subTerm": "Add Sub-Term",
+      "termName": "Term Name",
+      "select": "Select Attribute"
+    }
   },
   "checkout": {
     "title": "Checkout & Delivery",
     "deliveryAddress": "Delivery Address",
+    "fullName": "Full Name",
     "addressTitle": "Address Title (Home, Work)",
     "city": "City",
     "district": "District",
@@ -55,29 +100,38 @@
     "acceptKvkk": "Please accept the agreements.",
     "orderReceived": "Order Received! ☕",
     "orderMessage": "Order Number: #{{number}}\nThank you!",
-    "guestAlert": "Please log in to save address."
+    "guestAlert": "Please log in to save address.",
+    "successTitle": "Order Confirmed! 🚀",
+    "successMsg": "Order No: #{{orderNumber}}",
+    "emptyCart": "Your cart is empty.",
+    "goBack": "Go Back",
+    "orderFailed": "Failed to create order."
   },
   "profile": {
     "myAddresses": "My Addresses",
     "editAddress": "Edit Address",
     "saveChanges": "Save Changes",
-    "addressUpdated": "Address updated successfully."
+    "addressUpdated": "Address updated successfully.",
+    "guest": "Guest",
+    "adminAccount": "Admin Account",
+    "unauthorized": "Unauthorized access."
   },
   "orders": {
     "title": "My Orders",
     "orderNumber": "Order No",
     "orderDate": "Order Date",
     "status": {
-      "pending": "Sipariş Alındı",
-      "preparing": "Hazırlanıyor",
-      "shipped": "Kargoya Verildi",
-      "delivered": "Teslim Edildi",
-      "cancelled": "İptal Edildi"
+      "pending": "Order Received",
+      "preparing": "Preparing",
+      "shipped": "Shipped",
+      "delivered": "Delivered",
+      "cancelled": "Cancelled"
     },
     "total": "Total",
     "detailTitle": "Order Details",
     "items": "Items",
     "shippingInfo": "Shipping Info",
+    "notFound": "Order not found.",
     "noOrders": "You have no orders yet."
   },
   "adminOrders": {
@@ -100,6 +154,125 @@
     "clear": "Clear",
     "customer": "Customer",
     "address": "Address",
-    "items": "Items"
+    "items": "Items",
+    "empty": "No orders found.",
+    "toast": {
+      "shipped": { "title": "Shipped", "msg": "Order marked as shipped." },
+      "delivered": { "title": "Completed", "msg": "Order moved to archive." },
+      "cancelled": { "title": "Cancelled", "msg": "Order cancelled." },
+      "error": { "title": "Error", "msg": "Operation failed." }
+    }
+  },
+  "adminDashboard": {
+    "deleteConfirmWeb": "Are you sure you want to delete this product?",
+    "deleteTitle": "Deleting",
+    "deleteMsg": "This action cannot be undone.",
+    "searchPlaceholder": "Search products...",
+    "stats": {
+      "revenue": "Total Revenue",
+      "activeOrders": "Active Orders",
+      "lowStock": "Low Stock"
+    }
+  },
+  "home": {
+    "hero": {
+      "brand": "Lupin Coffee Co.",
+      "title": "A Perfect Start\nTo The Day",
+      "cta": "Discover Now"
+    },
+    "story": {
+      "title": "Our Story",
+      "content": "It all started with a bean. We roast beans carefully selected from the world's best coffee farms, combining traditional methods with modern technology. At Lupin Coffee, our goal is to fill your cup not just with coffee, but with a story of passion."
+    },
+    "quality": {
+      "organic": "Organic",
+      "fresh": "Fresh Roast",
+      "fastShipping": "Fast Shipping"
+    },
+    "sections": {
+      "bestSellers": "Best Sellers",
+      "viewAll": "View All",
+      "recommendations": "Selected For You"
+    },
+    "seedData": "Load Data"
+  },
+  "product": {
+    "lowStock": "LOW STOCK",
+    "criticalStock": "CRITICAL STOCK",
+    "addToCart": "Add +",
+    "pieces": "Pcs",
+    "stock": "Stock",
+    "totalPrice": "Total Price",
+    "outOfStock": "OUT OF STOCK"
+  },
+  "analytics": {
+    "title": "Revenue Analytics",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "allProducts": "All Products",
+    "totalInPeriod": "Total in Period",
+    "avgDaily": "Daily Average",
+    "downloadExcel": "Download CSV",
+    "selectDate": "Select Date",
+    "bestDay": "Best Performing Day",
+    "performance": "Product Performance",
+    "sales": "Sales",
+    "interest": "Interest (Favs)"
+  },
+  "customers": {
+    "title": "Customer Insights",
+    "topSpenders": "Top Spenders (Top 10)",
+    "totalSpend": "Total Spend",
+    "totalOrders": "Total Orders",
+    "lastOrder": "Last Order",
+    "favoriteProduct": "Favorite Product",
+    "searchPlaceholder": "Search Customers..."
+  },
+  "auth": {
+    "login": "Log In",
+    "register": "Sign Up",
+    "createAccount": "Create Account",
+    "forgotPassword": "Forgot Password?",
+    "or": "or",
+    "email": "Email Address",
+    "password": "Password",
+    "googlecontinue": "Continue with Google",
+    "haveAccount": "Already have an account?",
+    "noAccount": "Don't have an account?",
+    "sendResetLink": "Send Reset Link",
+    "resetTitle": "Reset Password",
+    "resetDesc": "Enter your email address and we'll send you a link to reset your password.",
+    "emailSent": "Reset email sent.",
+    "errors": {
+      "emailInUse": "Email already in use.",
+      "invalidEmail": "Invalid email address.",
+      "weakPassword": "Password is too weak (min 6 chars).",
+      "userNotFound": "User not found.",
+      "wrongPassword": "Wrong password.",
+      "general": "An error occurred."
+    }
+  },
+  "favorites": {
+    "title": "My Favorites",
+    "emptyTitle": "Your list is empty",
+    "emptySubtitle": "You haven't added any favorite products yet.",
+    "startShopping": "Start Shopping",
+    "added": "Added to favorites",
+    "removed": "Removed from favorites"
+  },
+  "crm": {
+    "title": "Customer Insights",
+    "vip": "VIP Customers",
+    "ltv": "Life Time Value",
+    "orders": "Orders",
+    "lastOrders": "Last Orders",
+    "favorites": "Favorites",
+    "customerDetail": "Customer Profile"
+  },
+  "notifications": {
+    "orderShippedTitle": "Order Shipped! 📦",
+    "orderShippedBody": "Your order is on its way, get ready!",
+    "orderCreatedTitle": "Order Received ✅",
+    "orderCreatedBody": "Your order has been successfully created."
   }
 }

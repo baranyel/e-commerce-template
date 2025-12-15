@@ -6,6 +6,11 @@
   "adminPanel": "Yönetici Paneli",
   "logout": "Çıkış Yap",
   "products": "Ürünler",
+  "tabs": {
+    "home": "Anasayfa",
+    "explore": "Keşfet",
+    "profile": "Profil"
+  },
   "common": {
     "all": "Tümü",
     "save": "Kaydet",
@@ -17,7 +22,8 @@
     "minPrice": "Min Fiyat",
     "maxPrice": "Max Fiyat",
     "filter": "Filtrele",
-    "currency": "₺"
+    "currency": "₺",
+    "or": "veya"
   },
   "admin": {
     "addProduct": "Yeni Ürün Ekle",
@@ -35,11 +41,50 @@
     "selectCategory": "Kategori Seç",
     "addNewCategory": "Yeni Kategori Ekle",
     "categoryName": "Kategori Adı",
-    "add": "Ekle"
+    "add": "Ekle",
+    "dashboard": {
+      "totalRevenue": "Toplam Ciro",
+      "todaysRevenue": "Bugünün Cirosu",
+      "activeOrders": "Aktif Siparişler",
+      "totalUsers": "Toplam Üye",
+      "lowStock": "Kritik Stok",
+      "topSelling": "Çok Satanlar",
+      "recentActivity": "Son Aktiviteler",
+      "quickActions": "Hızlı İşlemler",
+      "newProduct": "Ürün Ekle",
+      "viewOrders": "Siparişleri Gör",
+      "salesTrend": "Haftalık Satış Grafiği",
+      "viewProfile": "Profile Git",
+      "attributes": "Özellik Yönetimi"
+    },
+    "adminProducts": {
+      "title": "Ürün Yönetimi",
+      "active": "Yayında",
+      "inactive": "Gizli",
+      "search": "Ürün Ara...",
+      "status": "Durum",
+      "statusUpdated": "Ürün durumu güncellendi",
+      "empty": "Ürün bulunamadı."
+    },
+    "attribute": {
+      "title": "Özellik Yönetimi",
+      "create": "Yeni Özellik",
+      "name": "Özellik Adı",
+      "type": "Tip",
+      "hierarchical": "Hiyerarşik mi?",
+      "active": "Aktif mi?",
+      "terms": "Değerler",
+      "addTerm": "Değer Ekle",
+      "rootTerm": "Ana Değer Ekle",
+      "subTerm": "Alt Değer Ekle",
+      "termName": "Değer Adı",
+      "select": "Özellik Seç"
+    }
   },
   "checkout": {
     "title": "Ödeme ve Teslimat",
     "deliveryAddress": "Teslimat Adresi",
+    "fullName": "Ad Soyad",
     "addressTitle": "Adres Başlığı (Ev, İş)",
     "city": "Şehir",
     "district": "İlçe",
@@ -55,13 +100,21 @@
     "acceptKvkk": "Lütfen sözleşmeleri onaylayın.",
     "orderReceived": "Sipariş Alındı! ☕",
     "orderMessage": "Sipariş Numarası: #{{number}}\nTeşekkür ederiz!",
-    "guestAlert": "Adres kaydetmek için lütfen giriş yapın."
+    "guestAlert": "Adres kaydetmek için lütfen giriş yapın.",
+    "successTitle": "Siparişiniz Onaylandı! 🚀",
+    "successMsg": "Sipariş No: #{{orderNumber}}",
+    "emptyCart": "Sepetiniz boş.",
+    "goBack": "Geri Dön",
+    "orderFailed": "Sipariş oluşturulamadı."
   },
   "profile": {
     "myAddresses": "Adres Bilgilerim",
     "editAddress": "Adresi Düzenle",
     "saveChanges": "Değişiklikleri Kaydet",
-    "addressUpdated": "Adres bilgileri başarıyla güncellendi."
+    "addressUpdated": "Adres bilgileri başarıyla güncellendi.",
+    "guest": "Misafir",
+    "adminAccount": "Yönetici Hesabı",
+    "unauthorized": "Yetkisiz giriş."
   },
   "orders": {
     "title": "Siparişlerim",
@@ -78,6 +131,7 @@
     "detailTitle": "Sipariş Detayı",
     "items": "Ürünler",
     "shippingInfo": "Teslimat Bilgileri",
+    "notFound": "Sipariş bulunamadı.",
     "noOrders": "Henüz hiç siparişiniz yok."
   },
   "adminOrders": {
@@ -100,6 +154,125 @@
     "clear": "Temizle",
     "customer": "Müşteri",
     "address": "Adres",
-    "items": "Ürünler"
+    "items": "Ürünler",
+    "empty": "Sipariş bulunamadı.",
+    "toast": {
+      "shipped": { "title": "Kargolandı", "msg": "Sipariş kargoya verildi." },
+      "delivered": { "title": "Tamamlandı", "msg": "Sipariş arşive taşındı." },
+      "cancelled": { "title": "İptal", "msg": "Sipariş iptal edildi." },
+      "error": { "title": "Hata", "msg": "İşlem başarısız." }
+    }
+  },
+  "adminDashboard": {
+    "deleteConfirmWeb": "Bu ürünü silmek istediğine emin misin?",
+    "deleteTitle": "Siliniyor",
+    "deleteMsg": "Bu işlem geri alınamaz.",
+    "searchPlaceholder": "Ürün ara...",
+    "stats": {
+      "revenue": "Toplam Gelir",
+      "activeOrders": "Aktif Sipariş",
+      "lowStock": "Kritik Stok"
+    }
+  },
+  "home": {
+    "hero": {
+      "brand": "Lupin Coffee Co.",
+      "title": "Güne Mükemmel\nBir Başlangıç",
+      "cta": "Hemen Keşfet"
+    },
+    "story": {
+      "title": "Bizim Hikayemiz",
+      "content": "Her şey bir çekirdekle başladı. Dünyanın en iyi kahve çiftliklerinden özenle seçtiğimiz çekirdekleri, geleneksel yöntemlerle modern teknolojiyi birleştirerek kavuruyoruz. Lupin Coffee olarak amacımız, bardağınıza sadece kahve değil, bir tutku hikayesi doldurmak."
+    },
+    "quality": {
+      "organic": "Organik",
+      "fresh": "Taze Kavrum",
+      "fastShipping": "Hızlı Kargo"
+    },
+    "sections": {
+      "bestSellers": "Çok Satanlar",
+      "viewAll": "Tümünü Gör",
+      "recommendations": "Sizin İçin Seçtiklerimiz"
+    },
+    "seedData": "Verileri Yükle"
+  },
+  "product": {
+    "lowStock": "STOK AZ",
+    "criticalStock": "KRİTİK STOK",
+    "addToCart": "Ekle +",
+    "pieces": "Adet",
+    "stock": "Stok",
+    "totalPrice": "Toplam Fiyat",
+    "outOfStock": "TÜKENDİ"
+  },
+  "analytics": {
+    "title": "Gelir Analizi",
+    "startDate": "Başlangıç",
+    "endDate": "Bitiş",
+    "allProducts": "Tüm Ürünler",
+    "totalInPeriod": "Seçilen Dönem Toplamı",
+    "avgDaily": "Günlük Ortalama",
+    "downloadExcel": "CSV İndir",
+    "selectDate": "Tarih Seç",
+    "bestDay": "En İyi Gün",
+    "performance": "Ürün Performansı",
+    "sales": "Satış",
+    "interest": "İlgi (Favori)"
+  },
+  "customers": {
+    "title": "Müşteri Analizi",
+    "topSpenders": "En Çok Harcayanlar (Top 10)",
+    "totalSpend": "Toplam Harcama",
+    "totalOrders": "Sipariş Sayısı",
+    "lastOrder": "Son Sipariş",
+    "favoriteProduct": "Favori Ürün",
+    "searchPlaceholder": "Müşteri Ara..."
+  },
+  "auth": {
+    "login": "Giriş Yap",
+    "register": "Kayıt Ol",
+    "createAccount": "Hesap Oluştur",
+    "forgotPassword": "Şifremi Unuttum?",
+    "or": "veya",
+    "email": "E-posta Adresi",
+    "password": "Şifre",
+    "googlecontinue": "Google ile Devam Et",
+    "haveAccount": "Zaten hesabın var mı?",
+    "noAccount": "Hesabın yok mu?",
+    "sendResetLink": "Sıfırlama Linki Gönder",
+    "resetTitle": "Şifre Sıfırlama",
+    "resetDesc": "E-posta adresinizi girin, size şifre sıfırlama bağlantısı gönderelim.",
+    "emailSent": "Sıfırlama e-postası gönderildi.",
+    "errors": {
+      "emailInUse": "Bu e-posta adresi zaten kullanımda.",
+      "invalidEmail": "Geçersiz e-posta adresi.",
+      "weakPassword": "Şifre çok zayıf (en az 6 karakter).",
+      "userNotFound": "Kullanıcı bulunamadı.",
+      "wrongPassword": "Hatalı şifre.",
+      "general": "Bir hata oluştu."
+    }
+  },
+  "favorites": {
+    "title": "Favorilerim",
+    "emptyTitle": "Listeniz Boş",
+    "emptySubtitle": "Henüz favori ürün eklemediniz.",
+    "startShopping": "Alışverişe Başla",
+    "added": "Favorilere eklendi",
+    "removed": "Favorilerden çıkarıldı"
+  },
+  "crm": {
+    "title": "Müşteri Analizi",
+    "vip": "VIP Müşteriler",
+    "ltv": "Toplam Harcama",
+    "orders": "Sipariş",
+    "lastOrders": "Son Siparişler",
+    "favorites": "Favorileri",
+    "customerDetail": "Müşteri Profili"
+  },
+  "notifications": {
+    "orderShippedTitle": "Siparişiniz Kargolandı! 📦",
+    "orderShippedBody": "Siparişiniz yola çıktı, heyecanla bekleyin.",
+    "orderCreatedTitle": "Sipariş Alındı ✅",
+    "orderCreatedBody": "Siparişiniz başarıyla oluşturuldu."
   }
 }

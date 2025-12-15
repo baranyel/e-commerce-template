@@ -71,6 +71,10 @@ export default function AdminLayout() {
             name="orders"
             options={{ title: t(`adminOrders.title`) }}
           />
+          <Stack.Screen
+             name="products"
+             options={{ title: t('admin.adminProducts.title') || "Products" }}
+          />
         </Stack>
       </View>
     </View>

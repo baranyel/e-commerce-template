@@ -45,7 +45,7 @@ export default function AddressSelector({
   const handleSelect = (item: string) => {
     if (modalType === "city") {
       onCityChange(item);
-      onDistrictChange(""); // Şehir değişince ilçeyi sıfırla
+      // onDistrictChange(""); // REMOVED: Managed by parent to avoid race condition
     } else {
       onDistrictChange(item);
     }

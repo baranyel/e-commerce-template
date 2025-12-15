@@ -6,6 +6,11 @@
   "adminPanel": "Admin-Panel",
   "logout": "Abmelden",
   "products": "Produkte",
+  "tabs": {
+    "home": "Startseite",
+    "explore": "Entdecken",
+    "profile": "Profil"
+  },
   "common": {
     "save": "Speichern",
     "cancel": "Abbrechen",
@@ -13,7 +18,10 @@
     "edit": "Bearbeiten",
     "error": "Fehler",
     "success": "Erfolg",
-    "all": "Alle"
+    "all": "Alle",
+    "or": "oder",
+    "sales": "Verkäufe",
+    "items": "Artikel"
   },
   "admin": {
     "addProduct": "Neues Produkt hinzufügen",
@@ -31,11 +39,50 @@
     "selectCategory": "Kategorie auswählen",
     "addNewCategory": "Neue Kategorie hinzufügen",
     "categoryName": "Kategoriename",
-    "add": "Hinzufügen"
+    "add": "Hinzufügen",
+    "dashboard": {
+      "totalRevenue": "Gesamtumsatz",
+      "todaysRevenue": "Heutiger Umsatz",
+      "activeOrders": "Aktive Bestellungen",
+      "totalUsers": "Gesamtbenutzer",
+      "lowStock": "Geringer Bestand",
+      "topSelling": "Meistverkauft",
+      "recentActivity": "Letzte Aktivitäten",
+      "quickActions": "Schnellaktionen",
+      "newProduct": "Produkt Hinzufügen",
+      "viewOrders": "Bestellungen Ansehen",
+      "salesTrend": "Wöchentlicher Verkaufstrend",
+      "viewProfile": "Zum Profil",
+      "attributes": "Attribute verwalten"
+    },
+    "adminProducts": {
+      "title": "Produktmanagement",
+      "active": "Aktiv",
+      "inactive": "Versteckt",
+      "search": "Produkte suchen...",
+      "status": "Status",
+      "statusUpdated": "Produktstatus aktualisiert",
+      "empty": "Keine Produkte gefunden."
+    },
+    "attribute": {
+      "title": "Attributverwaltung",
+      "create": "Neues Attribut",
+      "name": "Attributname",
+      "type": "Typ",
+      "hierarchical": "Hierarchisch?",
+      "active": "Aktiv?",
+      "terms": "Werte",
+      "addTerm": "Wert hinzufügen",
+      "rootTerm": "Hauptwert hinzufügen",
+      "subTerm": "Unterwert hinzufügen",
+      "termName": "Wertname",
+      "select": "Attribut auswählen"
+    }
   },
   "checkout": {
     "title": "Kasse & Lieferung",
     "deliveryAddress": "Lieferadresse",
+    "fullName": "Vollständiger Name",
     "addressTitle": "Adresstitel (Zuhause, Arbeit)",
     "city": "Stadt",
     "district": "Bezirk",
@@ -51,13 +98,21 @@
     "acceptKvkk": "Bitte akzeptieren Sie die Verträge.",
     "orderReceived": "Bestellung erhalten! ☕",
     "orderMessage": "Bestellnummer: #{{number}}\nVielen Dank!",
-    "guestAlert": "Bitte melden Sie sich an, um die Adresse zu speichern."
+    "guestAlert": "Bitte melden Sie sich an, um die Adresse zu speichern.",
+    "successTitle": "Bestellung Bestätigt! 🚀",
+    "successMsg": "Bestell-Nr: #{{orderNumber}}",
+    "emptyCart": "Ihr Warenkorb ist leer.",
+    "goBack": "Zurück",
+    "orderFailed": "Bestellung fehlgeschlagen."
   },
   "profile": {
     "myAddresses": "Meine Adressen",
     "editAddress": "Adresse bearbeiten",
     "saveChanges": "Änderungen speichern",
-    "addressUpdated": "Adresse erfolgreich aktualisiert."
+    "addressUpdated": "Adresse erfolgreich aktualisiert.",
+    "guest": "Gast",
+    "adminAccount": "Admin-Konto",
+    "unauthorized": "Unbefugter Zugriff."
   },
   "orders": {
     "title": "Meine Bestellungen",
@@ -73,6 +128,146 @@
     "detailTitle": "Bestelldetails",
     "items": "Artikel",
     "shippingInfo": "Versandinformationen",
+    "notFound": "Bestellung nicht gefunden.",
     "noOrders": "Sie haben noch keine Bestellungen."
+  },
+  "adminOrders": {
+    "title": "Auftragsverwaltung",
+    "activeOrders": "Aktive Bestellungen",
+    "archive": "Archiv",
+    "markAsShipped": "Als versandt markieren",
+    "markAsDelivered": "Als geliefert markieren",
+    "cancelOrder": "Bestellung stornieren",
+    "trackingUrl": "Tracking-URL",
+    "trackingUrlPlaceholder": "https://...",
+    "enterTracking": "Versandinfo",
+    "enterTrackingDesc": "Tracking-Link eingeben.",
+    "filter": "Filter",
+    "startDate": "Startdatum",
+    "endDate": "Enddatum",
+    "minPrice": "Min Preis",
+    "maxPrice": "Max Preis",
+    "apply": "Anwenden",
+    "clear": "Leeren",
+    "items": "Artikel",
+    "empty": "Keine Bestellungen gefunden.",
+    "toast": {
+      "shipped": { "title": "Versandt", "msg": "Bestellung als versandt markiert." },
+      "delivered": { "title": "Abgeschlossen", "msg": "Bestellung ins Archiv verschoben." },
+      "cancelled": { "title": "Storniert", "msg": "Bestellung storniert." },
+      "error": { "title": "Fehler", "msg": "Vorgang fehlgeschlagen." }
+    }
+  },
+  "adminDashboard": {
+    "deleteConfirmWeb": "Möchten Sie dieses Produkt wirklich löschen?",
+    "deleteTitle": "Löschen",
+    "deleteMsg": "Diese Aktion kann nicht rückgängig gemacht werden.",
+    "searchPlaceholder": "Produkte suchen...",
+    "stats": {
+      "revenue": "Gesamtumsatz",
+      "activeOrders": "Aktive Bestellungen",
+      "lowStock": "Geringer Bestand"
+    }
+  },
+  "home": {
+    "hero": {
+      "brand": "Lupin Coffee Co.",
+      "title": "Ein Perfekter Start\nIn Den Tag",
+      "cta": "Jetzt Entdecken"
+    },
+    "story": {
+      "title": "Unsere Geschichte",
+      "content": "Alles begann mit einer Bohne. Wir rösten Bohnen, die sorgfältig von den besten Kaffeefarmen der Welt ausgewählt wurden, und kombinieren traditionelle Methoden mit moderner Technologie. Unser Ziel bei Lupin Coffee ist es, Ihre Tasse nicht nur mit Kaffee, sondern mit einer Geschichte aus Leidenschaft zu füllen."
+    },
+    "quality": {
+      "organic": "Bio",
+      "fresh": "Frisch Geröstet",
+      "fastShipping": "Schneller Versand"
+    },
+    "sections": {
+      "bestSellers": "Bestseller",
+      "viewAll": "Alle Anzeigen",
+      "recommendations": "Für Sie Ausgewählt"
+    },
+    "seedData": "Daten Laden"
+  },
+  "product": {
+    "lowStock": "GERINGER BESTAND",
+    "criticalStock": "KRITISCHER BESTAND",
+    "addToCart": "Hinzufügen +",
+    "pieces": "Stk.",
+    "stock": "Bestand",
+    "totalPrice": "Gesamtpreis",
+    "outOfStock": "AUSVERKAUFT"
+  },
+  "analytics": {
+    "title": "Umsatzanalyse",
+    "startDate": "Startdatum",
+    "endDate": "Enddatum",
+    "allProducts": "Alle Produkte",
+    "totalInPeriod": "Gesamt im Zeitraum",
+    "avgDaily": "Täglicher Durchschnitt",
+    "downloadExcel": "CSV Herunterladen",
+    "selectDate": "Datum Wählen",
+    "bestDay": "Bester Tag",
+    "performance": "Produktleistung",
+    "sales": "Verkäufe",
+    "interest": "Interesse (Favs)"
+  },
+  "customers": {
+    "title": "Kundeneinblicke",
+    "topSpenders": "Top-Kunden (Top 10)",
+    "totalSpend": "Gesamtausgaben",
+    "totalOrders": "Gesamtbestellungen",
+    "lastOrder": "Letzte Bestellung",
+    "favoriteProduct": "Lieblingsprodukt",
+    "searchPlaceholder": "Kunden suchen..."
+  },
+  "auth": {
+    "login": "Anmelden",
+    "register": "Registrieren",
+    "createAccount": "Konto Erstellen",
+    "forgotPassword": "Passwort vergessen?",
+    "or": "oder",
+    "email": "E-Mail Adresse",
+    "password": "Passwort",
+    "googlecontinue": "Mit Google fortfahren",
+    "haveAccount": "Haben Sie bereits ein Konto?",
+    "noAccount": "Haben Sie kein Konto?",
+    "sendResetLink": "Link senden",
+    "resetTitle": "Passwort zurücksetzen",
+    "resetDesc": "Geben Sie Ihre E-Mail-Adresse ein, um einen Link zum Zurücksetzen zu erhalten.",
+    "emailSent": "E-Mail gesendet.",
+    "errors": {
+      "emailInUse": "E-Mail wird bereits verwendet.",
+      "invalidEmail": "Ungültige E-Mail-Adresse.",
+      "weakPassword": "Passwort ist zu schwach (min 6 Zeichen).",
+      "userNotFound": "Benutzer nicht gefunden.",
+      "wrongPassword": "Falsches Passwort.",
+      "general": "Ein Fehler ist aufgetreten."
+    }
+  },
+  "favorites": {
+    "title": "Meine Favoriten",
+    "emptyTitle": "Deine Liste ist leer",
+    "emptySubtitle": "Du hast noch keine Favoriten hinzugefügt.",
+    "startShopping": "Jetzt einkaufen",
+    "added": "Zu Favoriten hinzugefügt",
+    "removed": "Aus Favoriten entfernt"
+  },
+  "crm": {
+    "title": "Kundenanalyse",
+    "vip": "VIP-Kunden",
+    "ltv": "Gesamtausgaben",
+    "orders": "Bestellungen",
+    "lastOrders": "Letzte Bestellungen",
+    "favorites": "Favoriten",
+    "customerDetail": "Kundenprofil"
+  },
+  "notifications": {
+    "orderShippedTitle": "Bestellung Versandt! 📦",
+    "orderShippedBody": "Ihre Bestellung ist unterwegs.",
+    "orderCreatedTitle": "Bestellung Erhalten ✅",
+    "orderCreatedBody": "Ihre Bestellung wurde erfolgreich erstellt."
   }
 }

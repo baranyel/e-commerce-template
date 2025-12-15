@@ -14,13 +14,16 @@ import {
 import { useRouter } from "expo-router";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
+import { useLoading } from "../context/LoadingContext"; // Import Global Loader
 import {
   collection,
   addDoc,
   doc,
   updateDoc,
+  setDoc,
   writeBatch,
   increment,
+  getDoc,
 } from "firebase/firestore";
 import { db } from "../firebase/config";
 import { Ionicons } from "@expo/vector-icons";
@@ -32,12 +35,14 @@ import AddressSelector from "../components/AddressSelector";
 import Colors from "@/constants/Colors";
 import { useColorScheme } from "@/components/useColorScheme";
 import { useClientOnlyValue } from "@/components/useClientOnlyValue";
+import { sendPushNotification } from "../utils/sendNotification";
 
 export default function CheckoutScreen() {
   const router = useRouter();
   const { t } = useTranslation(); // Çeviri kancası
   const { cart, totalPrice, clearCart } = useCart();
   const { user, userProfile } = useAuth(); // Profil verisini çekiyoruz
+  const { showLoading, hideLoading } = useLoading(); // Global Loader
 
   const [loading, setLoading] = useState(false);
   const [kvkkAccepted, setKvkkAccepted] = useState(false); // Sözleşme onayı
@@ -46,10 +51,7 @@ export default function CheckoutScreen() {
   const colorScheme = useColorScheme();
 
   // Renk Ayarları
-  // Dış taraf (Boşluklar): Açık modda Gri (#F3F4F6), Koyu modda Tam Siyah
   const outerBackgroundColor = colorScheme === "dark" ? "#000000" : "#f5f5f5";
-
-  // İç taraf (İçerik): Açık modda Beyaz, Koyu modda Koyu Gri/Siyah
   const innerBackgroundColor = Colors[colorScheme ?? "light"].background;
 
   // Form State
@@ -95,18 +97,20 @@ export default function CheckoutScreen() {
     }
 
     setLoading(true);
+    showLoading(); // Show Curtain
 
     try {
       // 2. Profil Güncelleme (Aynen kalsın)
       if (saveAddressToProfile && user) {
         const userRef = doc(db, "users", user.uid);
-        await updateDoc(userRef, {
+        // Changed updateDoc to setDoc with merge to handle cases where user doc doesn't exist
+        await setDoc(userRef, {
           addressTitle: form.title,
           city: form.city,
           district: form.district,
           fullAddress: form.fullAddress,
           phone: form.phone,
-        } as Partial<UserProfile>);
+        }, { merge: true });
       }
 
       // --- SİPARİŞ OLUŞTURMA (BATCH) ---
@@ -126,7 +130,7 @@ export default function CheckoutScreen() {
         items: cart,
         totalAmount: totalPrice,
         currency: "TRY",
-        status: "Sipariş Alındı", // Kullanıcıya güzel görünsün diye Türkçeleştirdim
+        status: "pending", 
         address: form,
         createdAt: Date.now(),
         orderNumber: orderNumber,
@@ -150,19 +154,35 @@ export default function CheckoutScreen() {
       // 1. Önce sepeti temizle
       await clearCart();
 
-      // 2. Kullanıcıya bildirimi çak (Toast Layout'ta olduğu için sayfa değişse de görünür)
+      // 2. Kullanıcıya bildirimi çak
       Toast.show({
         type: "success",
-        text1: "Siparişiniz Onaylandı! 🚀",
-        text2: `Sipariş No: #${orderNumber}`,
-        visibilityTime: 4000, // Biraz uzun kalsın okusunlar
+        text1: t("checkout.successTitle"),
+        text2: t("checkout.successMsg", { orderNumber }),
+        visibilityTime: 4000,
       });
 
-      // 3. VE GOOOOL: Direkt detay sayfasına ışınla
-      // replace kullanıyoruz ki "Geri" tuşu Checkout'a değil Anasayfaya/Profile dönsün.
-      router.replace(`/order-details/${newOrderRef.id}` as any);
+      // SEND NOTIFICATION (Local User)
+      if (user) {
+          const userDoc = await getDoc(doc(db, "users", user.uid));
+          if (userDoc.exists() && userDoc.data().pushToken) {
+              await sendPushNotification(
+                  userDoc.data().pushToken,
+                  t('notifications.orderCreatedTitle'),
+                  t('notifications.orderCreatedBody')
+              );
+          }
+      }
+
+      // 3. Yonlendirme
+      setTimeout(() => {
+          hideLoading();
+          router.replace("/orders");
+      }, 2000); // 2 saniye bekle, sonra git (animasyon icin)
+
     } catch (error) {
       console.error(error);
+      hideLoading(); // Hata varsa hemen gizle
       Toast.show({
         type: "error",
         text1: t("common.error"),
@@ -176,12 +196,12 @@ export default function CheckoutScreen() {
   if (cart.length === 0) {
     return (
       <View className="flex-1 justify-center items-center bg-white">
-        <Text className="text-gray-500 mb-4">Sepetiniz boş.</Text>
+        <Text className="text-gray-500 mb-4">{t("checkout.emptyCart")}</Text>
         <TouchableOpacity
           onPress={() => router.back()}
           className="bg-amber-900 px-6 py-3 rounded-xl"
         >
-          <Text className="text-white font-bold">Geri Dön</Text>
+          <Text className="text-white font-bold">{t("checkout.goBack")}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -235,9 +255,9 @@ export default function CheckoutScreen() {
                 <AddressSelector
                   selectedCity={form.city}
                   selectedDistrict={form.district}
-                  onCityChange={(city) => setForm({ ...form, city })}
+                  onCityChange={(city) => setForm(prev => ({ ...prev, city, district: "" }))}
                   onDistrictChange={(district) =>
-                    setForm({ ...form, district })
+                    setForm(prev => ({ ...prev, district }))
                   }
                 />
 

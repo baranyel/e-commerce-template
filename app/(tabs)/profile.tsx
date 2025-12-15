@@ -51,7 +51,7 @@ export default function ProfileScreen() {
     if (isAdmin) {
       router.push("/(admin)/dashboard");
     } else {
-      Alert.alert(t("common.error"), "Yetkisiz giriş.");
+      Alert.alert(t("common.error"), t("profile.unauthorized"));
     }
   };
 
@@ -68,14 +68,14 @@ export default function ProfileScreen() {
             <Text className="text-4xl">☕</Text>
           </View>
           <Text className="text-2xl font-bold text-gray-900">
-            {user?.displayName || user?.email || "Misafir"}
+            {user?.displayName || user?.email || t("profile.guest")}
           </Text>
           <Text className="text-gray-500">{user?.email}</Text>
 
           {isAdmin && (
             <View className="bg-amber-100 px-3 py-1 rounded-full mt-2 border border-amber-200">
               <Text className="text-amber-800 text-xs font-bold uppercase">
-                Yönetici Hesabı
+                {t("profile.adminAccount")}
               </Text>
             </View>
           )}
@@ -112,6 +112,23 @@ export default function ProfileScreen() {
             />
             <Text className="flex-1 text-gray-700 text-base ml-3">
               {t("orders.title")}
+            </Text>
+            <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
+          </TouchableOpacity>
+
+          {/* Favorilerim */}
+          <TouchableOpacity
+            onPress={() => router.push("/favorites")}
+            className="flex-row items-center p-4 border-b border-gray-100"
+          >
+            <Ionicons
+              name="heart-outline"
+              size={22}
+              color="#4b5563"
+              className="mr-3"
+            />
+            <Text className="flex-1 text-gray-700 text-base ml-3">
+              {t("favorites.title")}
             </Text>
             <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
           </TouchableOpacity>

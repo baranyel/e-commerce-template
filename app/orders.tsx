@@ -6,9 +6,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
-  Clipboard,
-} from "react-native"; // Clipboard eklendi
-// import { SafeAreaView } from "react-native-safe-area-context";
+} from "react-native";
 import { ScreenWrapper } from "../components/ui/ScreenWrapper";
 import { useRouter } from "expo-router";
 import {
@@ -23,10 +21,6 @@ import { useAuth } from "../context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 
-import Colors from "@/constants/Colors";
-import { useColorScheme } from "@/components/useColorScheme";
-import { useClientOnlyValue } from "@/components/useClientOnlyValue";
-
 export default function OrdersScreen() {
   const router = useRouter();
   const { t } = useTranslation();
@@ -34,17 +28,7 @@ export default function OrdersScreen() {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const colorScheme = useColorScheme();
-
-  // Renk Ayarları
-  // Dış taraf (Boşluklar): Açık modda Gri (#F3F4F6), Koyu modda Tam Siyah
-  const outerBackgroundColor = colorScheme === "dark" ? "#000000" : "#f5f5f5";
-
-  // İç taraf (İçerik): Açık modda Beyaz, Koyu modda Koyu Gri/Siyah
-  const innerBackgroundColor = Colors[colorScheme ?? "light"].background;
-
   useEffect(() => {
-    // Kullanıcı yoksa işlem yapma
     if (!user) {
       setLoading(false);
       return;
@@ -52,7 +36,6 @@ export default function OrdersScreen() {
 
     setLoading(true);
 
-    // SORGU: Benim ID'me sahip olanlar VE Tarihe göre tersten sırala
     const q = query(
       collection(db, "orders"),
       where("userId", "==", user.uid),
@@ -62,11 +45,6 @@ export default function OrdersScreen() {
     const unsubscribe = onSnapshot(
       q,
       (snapshot) => {
-        // Veri geldi mi bakalım?
-        console.log(
-          `Veri çekildi: ${snapshot.docs.length} adet sipariş bulundu.`
-        );
-
         const data = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
@@ -75,13 +53,11 @@ export default function OrdersScreen() {
         setLoading(false);
       },
       (error) => {
-        // --- HATA YAKALAMA ---
         console.error("Sipariş Çekme Hatası:", error);
-
         if (error.message.includes("index")) {
           Alert.alert(
             "Sistem Hatası: Index Eksik",
-            "Firebase Console'da bu sorgu için Index oluşturulması gerekiyor. Link konsola yazıldı."
+            "Firebase Console'da bu sorgu için Index oluşturulması gerekiyor."
           );
         }
         setLoading(false);
@@ -121,83 +97,67 @@ export default function OrdersScreen() {
   };
 
   const renderItem = ({ item }: { item: any }) => {
-    // Tarih formatlama güvenliği
     const date = item.createdAt
       ? new Date(item.createdAt).toLocaleDateString("tr-TR")
       : "-";
-    // Durum çevirisi için güvenli erişim
     const statusLabel = getStatusInfo(item.status).label;
     const translatedStatus =
       t(statusLabel) !== statusLabel ? t(statusLabel) : item.status;
 
     return (
-      <View style={{ flex: 1, backgroundColor: outerBackgroundColor }}>
-        <View
-          style={{
-            flex: 1,
-            width: "100%",
-            maxWidth: 1200,
-            alignSelf: "center",
-            // Web'de kenarlarda gölge olsun istersen bunu açabilirsin:
-            // shadowColor: "#000", shadowOpacity: 0.1, shadowRadius: 10, elevation: 5
-          }}
-        >
-          {" "}
-          <TouchableOpacity
-            onPress={() => router.push(`/order-detail/${item.id}` as any)}
-            className="bg-white p-4 rounded-xl mb-3 shadow-sm border border-gray-100"
+      <TouchableOpacity
+        onPress={() => router.push(`/order-detail/${item.id}` as any)}
+        className="bg-white p-4 rounded-xl mb-3 shadow-sm border border-gray-100"
+      >
+        <View className="flex-row justify-between items-start mb-2">
+          <View>
+            <Text className="text-xs text-gray-500 font-bold uppercase">
+              {t("orders.orderNumber")}
+            </Text>
+            <Text className="text-gray-900 font-bold text-base">
+              #{item.orderNumber}
+            </Text>
+          </View>
+          <View
+            className={`px-3 py-1 rounded-full ${
+              getStatusInfo(item.status).color
+            }`}
           >
-            <View className="flex-row justify-between items-start mb-2">
-              <View>
-                <Text className="text-xs text-gray-500 font-bold uppercase">
-                  {t("orders.orderNumber")}
-                </Text>
-                <Text className="text-gray-900 font-bold text-base">
-                  #{item.orderNumber}
-                </Text>
-              </View>
-              <View
-                className={`px-3 py-1 rounded-full ${
-                  getStatusInfo(item.status).color
-                }`}
-              >
-                <Text
-                  className={`text-xs font-bold ${
-                    getStatusInfo(item.status).text
-                  }`}
-                >
-                  {translatedStatus}
-                </Text>
-              </View>
-            </View>
-
-            <View className="h-[1px] bg-gray-100 my-2" />
-
-            <View className="flex-row justify-between items-center">
-              <View>
-                <Text className="text-xs text-gray-400">
-                  {t("orders.orderDate")}
-                </Text>
-                <Text className="text-gray-600 text-sm">{date}</Text>
-              </View>
-              <View>
-                <Text className="text-xs text-gray-400 text-right">
-                  {t("orders.total")}
-                </Text>
-                <Text className="text-amber-900 font-bold text-lg">
-                  {item.totalAmount} TL
-                </Text>
-              </View>
-            </View>
-          </TouchableOpacity>
+            <Text
+              className={`text-xs font-bold ${
+                getStatusInfo(item.status).text
+              }`}
+            >
+              {translatedStatus}
+            </Text>
+          </View>
         </View>
-      </View>
+
+        <View className="h-[1px] bg-gray-100 my-2" />
+
+        <View className="flex-row justify-between items-center">
+          <View>
+            <Text className="text-xs text-gray-400">
+              {t("orders.orderDate")}
+            </Text>
+            <Text className="text-gray-600 text-sm">{date}</Text>
+          </View>
+          <View>
+            <Text className="text-xs text-gray-400 text-right">
+              {t("orders.total")}
+            </Text>
+            <Text className="text-amber-900 font-bold text-lg">
+              {item.totalAmount} TL
+            </Text>
+          </View>
+        </View>
+      </TouchableOpacity>
     );
   };
 
   return (
     <ScreenWrapper>
-      <View className="flex-row items-center p-4 bg-white shadow-sm border-b border-gray-100 w-full">
+      <View className="flex-row items-center p-4 bg-white shadow-sm border-b border-gray-100 w-full mb-2">
         <TouchableOpacity onPress={() => router.back()} className="mr-4">
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
@@ -212,6 +172,7 @@ export default function OrdersScreen() {
         <FlatList
           data={orders}
           renderItem={renderItem}
+          className="flex-1"
           keyExtractor={(item) => item.id}
           contentContainerStyle={{ padding: 16 }}
           ListEmptyComponent={

@@ -12,7 +12,8 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useAuth } from "../context/AuthContext";
-import { doc, updateDoc } from "firebase/firestore";
+import { useLoading } from "../context/LoadingContext"; // Import Global Loader
+import { doc, updateDoc, setDoc } from "firebase/firestore";
 import { db } from "../firebase/config";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -28,6 +29,7 @@ export default function ProfileEditScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const { user, userProfile } = useAuth();
+  const { showLoading, hideLoading } = useLoading(); // Global Loader
 
   const [loading, setLoading] = useState(false);
 
@@ -37,6 +39,7 @@ export default function ProfileEditScreen() {
     district: "",
     fullAddress: "",
     phone: "",
+    fullName: "",
   });
 
   const colorScheme = useColorScheme();
@@ -56,6 +59,7 @@ export default function ProfileEditScreen() {
         district: userProfile.district || "",
         fullAddress: userProfile.fullAddress || "",
         phone: userProfile.phone || "",
+        fullName: userProfile.fullName || "",
       });
     }
   }, [userProfile]);
@@ -63,18 +67,20 @@ export default function ProfileEditScreen() {
   const handleSave = async () => {
     if (!user) return;
     setLoading(true);
+    showLoading(); // Show Curtain
 
     try {
       const userRef = doc(db, "users", user.uid);
-
-      await updateDoc(userRef, {
-        // ... veriler aynı ...
+      
+      // Changed to setDoc with merge: true to create doc if missing
+      await setDoc(userRef, {
+        fullName: form.fullName,
         addressTitle: form.title,
         city: form.city,
         district: form.district,
         fullAddress: form.fullAddress,
         phone: form.phone,
-      } as Partial<UserProfile>);
+      }, { merge: true });
 
       // TOAST BİLDİRİMİ
       Toast.show({
@@ -84,9 +90,13 @@ export default function ProfileEditScreen() {
       });
 
       // Hemen geri atabiliriz veya biraz bekleyebiliriz
-      setTimeout(() => router.back(), 1000);
+      setTimeout(() => {
+          hideLoading();
+          router.back();
+      }, 1000);
     } catch (error) {
       console.error(error);
+      hideLoading(); // Hide immediately on error
       Toast.show({
         type: "error",
         text1: "Hata",
@@ -125,6 +135,16 @@ export default function ProfileEditScreen() {
           >
             <ScrollView className="p-4">
               <View className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                <Text className="text-gray-500 mb-1 ml-1 text-xs font-bold uppercase">
+                  {t("checkout.fullName") || "Ad Soyad"}
+                </Text>
+                <TextInput
+                  value={form.fullName}
+                  onChangeText={(text) => setForm({ ...form, fullName: text })}
+                  className="bg-gray-50 p-3 rounded-xl border border-gray-200 mb-4"
+                  placeholder={t("checkout.fullName")}
+                />
+
                 <Text className="text-gray-500 mb-1 ml-1 text-xs font-bold uppercase">
                   {t("checkout.addressTitle")}
                 </Text>

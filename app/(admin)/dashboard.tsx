@@ -1,20 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   View,
   Text,
-  FlatList,
+  ScrollView,
   TouchableOpacity,
-  Alert,
   ActivityIndicator,
-  TextInput,
-  Platform,
+  Image,
+  Dimensions
 } from "react-native";
 import { ScreenWrapper } from "../../components/ui/ScreenWrapper";
-import { ProductCard } from "../../components/ui/ProductCard";
 import {
   collection,
-  deleteDoc,
-  doc,
   onSnapshot,
   query,
   orderBy,
@@ -24,224 +20,336 @@ import { Product } from "../../types";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
+import { LineChart } from "react-native-chart-kit";
 
-interface Category {
+// Types
+interface Order {
   id: string;
-  name: string;
+  totalAmount: number;
+  status: string;
+  createdAt: any; // Firestore Timestamp
+  userId: string;
+  items: any[];
 }
 
 export default function AdminDashboard() {
   const { t } = useTranslation();
   const router = useRouter();
+  const screenWidth = Dimensions.get("window").width;
 
-  // DİNAMİK KATEGORİ STATE
-  const [categories, setCategories] = useState<Category[]>([
-    { id: "all", name: "all" },
-  ]);
-  const [selectedCategory, setSelectedCategory] = useState("all");
-
-  // Veri State'leri
-  const [allProducts, setAllProducts] = useState<Product[]>([]);
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  // State
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Filtre State'leri
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isGridLayout, setIsGridLayout] = useState(false); // Varsayılan liste olsun, detay görmek için
-
-  // 1. Verileri Canlı Dinle
+  // Fetch Data
   useEffect(() => {
-    const q = query(collection(db, "products"), orderBy("createdAt", "desc"));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map((doc) => ({
-        ...doc.data(),
-        id: doc.id,
-      })) as Product[];
-      setAllProducts(data);
-      setLoading(false);
+    const qOrders = query(collection(db, "orders"), orderBy("createdAt", "desc"));
+    const unsubOrders = onSnapshot(qOrders, (snapshot) => {
+      const data = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as Order));
+      setOrders(data);
     });
-    return unsubscribe;
+
+    const qProducts = query(collection(db, "products"), orderBy("createdAt", "desc"));
+    const unsubProducts = onSnapshot(qProducts, (snapshot) => {
+      const data = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as Product));
+      setProducts(data);
+      if (loading) setLoading(false);
+    });
+
+    return () => {
+      unsubOrders();
+      unsubProducts();
+    };
   }, []);
 
-  useEffect(() => {
-    const q = query(collection(db, "categories"), orderBy("name"));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const fetchedCats = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as Category[];
-      setCategories([{ id: "all", name: "all" }, ...fetchedCats]);
-    });
-    return unsubscribe;
-  }, []);
+  // --- LOGIC & STATS ---
+  const stats = useMemo(() => {
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
 
-  // 2. Filtreleme Mantığı (Arama + Kategori)
-  useEffect(() => {
-    let result = allProducts;
+    // Revenue
+    const deliveredOrders = orders.filter(o => o.status === 'delivered');
+    const totalRevenue = deliveredOrders.reduce((sum, o) => sum + Number(o.totalAmount), 0);
+    
+    // Today's Revenue
+    const todayRevenue = deliveredOrders.reduce((sum, o) => {
+        const orderDate = o.createdAt?.seconds ? o.createdAt.seconds * 1000 : 0;
+        return orderDate >= todayStart ? sum + Number(o.totalAmount) : sum;
+    }, 0);
 
-    // Kategoriye göre süz
-    if (selectedCategory !== "all") {
-      result = result.filter((p) => p.category === selectedCategory);
-    }
+    // Active Orders
+    const activeOrdersCount = orders.filter(o => ['pending', 'preparing', 'shipped'].includes(o.status)).length;
 
-    // Arama metnine göre süz
-    if (searchQuery) {
-      const lowerQuery = searchQuery.toLowerCase();
-      result = result.filter(
-        (p) =>
-          p.title.toLowerCase().includes(lowerQuery) ||
-          p.description.toLowerCase().includes(lowerQuery)
-      );
-    }
+    // Total Users (Unique User IDs)
+    const uniqueUsers = new Set(orders.map(o => o.userId)).size;
 
-    setFilteredProducts(result);
-  }, [searchQuery, selectedCategory, allProducts]);
+    // Low Stock
+    const lowStockCount = products.filter(p => p.stock < 5).length;
 
-  // Silme Fonksiyonu (Web/Mobil Uyumlu)
-  const handleDelete = async (id: string) => {
-    if (Platform.OS === "web") {
-      const confirm = window.confirm("Bu ürünü silmek istediğine emin misin?");
-      if (confirm) {
-        try {
-          await deleteDoc(doc(db, "products", id));
-        } catch (error: any) {
-          alert("Hata: " + error.message);
+    // Product Lookup Map for Images
+    const productMap = new Map(products.map(p => [p.id, p]));
+
+    // Top Selling Products
+    const productSales: Record<string, { count: number, title: string, image: string }> = {};
+    orders.forEach(order => {
+        if (order.status !== 'cancelled') {
+            order.items?.forEach((item: any) => {
+                const liveProduct = productMap.get(item.id);
+                // Try order item image -> live product image -> placeholder
+                const image = item.image || item.images?.[0] || liveProduct?.images?.[0] || "https://via.placeholder.com/150";
+                
+                if (!productSales[item.id]) {
+                    productSales[item.id] = { count: 0, title: item.title, image };
+                }
+                productSales[item.id].count += item.quantity || 1;
+            });
         }
-      }
-      return;
-    }
+    });
+    const topSelling = Object.values(productSales)
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5);
 
-    Alert.alert("Siliniyor", "Bu işlem geri alınamaz.", [
-      { text: "Vazgeç", style: "cancel" },
-      {
-        text: "Sil",
-        style: "destructive",
-        onPress: async () => await deleteDoc(doc(db, "products", id)),
-      },
-    ]);
+    // Recent Activity (Last 5 orders)
+    const recentActivity = orders.slice(0, 5);
+
+    return {
+        totalRevenue,
+        todayRevenue,
+        activeOrdersCount,
+        uniqueUsers,
+        lowStockCount,
+        topSelling,
+        recentActivity
+    };
+  }, [orders, products]);
+
+  // --- UI COMPONENTS ---
+  
+  const StatCard = ({ title, value, subValue, icon, color, bgColor }: any) => (
+    <View className="w-[48%] bg-white p-4 rounded-2xl shadow-sm mb-4 border border-gray-50">
+        <View className={`w-10 h-10 rounded-full items-center justify-center mb-3 ${bgColor}`}>
+            <Ionicons name={icon} size={20} color={color} />
+        </View>
+        <Text className="text-gray-500 text-xs font-medium mb-1">{title}</Text>
+        <Text className="text-gray-900 text-lg font-bold">{value}</Text>
+        {subValue && <Text className="text-xs text-green-600 mt-1 font-medium">{subValue}</Text>}
+    </View>
+  );
+
+  // ... QuickAction Component
+  const QuickAction = ({ title, icon, onPress }: any) => {
+      const isDesktop = screenWidth > 768;
+      // Removed aspect-square, added fixed height/min-height constraints for text flow
+      return (
+        <TouchableOpacity 
+            onPress={onPress}
+            style={{ width: isDesktop ? '23%' : '48%' }}
+            className="bg-white p-3 rounded-2xl border border-gray-100 shadow-sm items-center justify-center mb-4 min-h-[110px]"
+        >
+            <View className="w-10 h-10 rounded-full bg-amber-50 items-center justify-center mb-2">
+                 <Ionicons name={icon} size={22} color="#d97706" />
+            </View>
+            <Text className="text-gray-700 font-bold text-xs text-center leading-tight" numberOfLines={2} ellipsizeMode="tail">{title}</Text>
+        </TouchableOpacity>
+      );
   };
 
-  // Kart Bileşeni (Refactored)
-  const renderItem = ({ item }: { item: Product }) => {
+  if (loading) {
     return (
-        <ProductCard
-            item={item}
-            layout={isGridLayout ? "grid" : "list"}
-            isAdmin
-            onPress={() => {}} // Admin modunda karta tıklayınca bir şey olmuyor genelde, ya da detay?
-            onEdit={(product) => router.push(`/edit/${product.id}` as any)}
-            onDelete={(product) => handleDelete(product.id)}
-        />
+        <ScreenWrapper>
+            <View className="flex-1 items-center justify-center">
+                <ActivityIndicator size="large" color="#78350f" />
+            </View>
+        </ScreenWrapper>
     );
-  };
+  }
 
   return (
     <ScreenWrapper>
-
-      {/* --- ÜST PANEL (Search & Filter) --- */}
-
-      <View className="bg-white p-4 pb-2 shadow-sm z-10">
-        {/* Arama Barı */}
-        <View className="flex-row items-center bg-gray-100 rounded-xl px-4 py-2 mb-3">
-          <Ionicons name="search" size={20} color="#9ca3af" />
-          <TextInput
-            placeholder="Ürün ara..."
-            className="flex-1 ml-2 text-gray-800 h-10"
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-          {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => setSearchQuery("")}>
-              <Ionicons name="close-circle" size={20} color="#9ca3af" />
-            </TouchableOpacity>
-          )}
-        </View>
-
-        <View className="flex-row justify-between items-center mb-4">
-          <Text className="text-xl font-bold text-gray-800">
-            {t(`products`)}
-          </Text>
-
-          {/* Sipariş Yönetimi Butonu */}
-          <TouchableOpacity
-            onPress={() => router.push("/(admin)/orders")}
-            className="bg-amber-100 px-4 py-2 rounded-lg flex-row items-center border border-amber-200"
-          >
-            <Ionicons name="receipt" size={18} color="#78350f" />
-            <Text className="text-amber-900 font-bold ml-2 text-xs">
-              {t(`adminOrders.title`)}
-            </Text>
-          </TouchableOpacity>
-        </View>
-        {/* --- DİNAMİK FİLTRELER (DEĞİŞEN KISIM) --- */}
-        <View className="flex-row justify-between items-center mb-2">
-          {/* ScrollView kullanıyoruz ki kategoriler taşarsa kaydırılabilsin */}
-          <FlatList
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            data={categories}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                onPress={() => setSelectedCategory(item.name)}
-                className={`px-3 py-1.5 rounded-full mr-2 ${
-                  selectedCategory === item.name
-                    ? "bg-amber-900"
-                    : "bg-gray-100"
-                }`}
-              >
-                <Text
-                  className={`text-xs font-bold ${
-                    selectedCategory === item.name
-                      ? "text-white"
-                      : "text-gray-600"
-                  }`}
-                >
-                  {item.id === "all" ? t("common.all") : item.name}
-                </Text>
-              </TouchableOpacity>
-            )}
-          />
-          <TouchableOpacity
-            onPress={() => setIsGridLayout(!isGridLayout)}
-            className="p-2 bg-gray-100 rounded-lg ml-2"
-          >
-            <Ionicons
-              name={isGridLayout ? "list" : "grid"}
-              size={20}
-              color="#4b5563"
-            />
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* --- LİSTE --- */}
-      {loading ? (
-        <ActivityIndicator size="large" color="#78350f" className="mt-10" />
-      ) : (
-        <FlatList
-          data={filteredProducts}
-          renderItem={renderItem}
-          key={isGridLayout ? "grid" : "list"} // Layout değişince yeniden çizmesi için
-          keyExtractor={(item) => item.id}
-          numColumns={isGridLayout ? 2 : 1}
-          contentContainerStyle={{ padding: 12, paddingBottom: 100 }}
-          ListEmptyComponent={
-            <View className="items-center mt-20">
-              <Ionicons name="cube-outline" size={48} color="#d1d5db" />
-              <Text className="text-gray-400 mt-2">Ürün bulunamadı.</Text>
+        <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 100 }}>
+            {/* Header */}
+            <View className="px-5 pt-6 pb-4">
+                <Text className="text-2xl font-bold text-gray-900">{t('adminPanel')}</Text>
+                <Text className="text-gray-500 text-sm mt-1">{t('admin.dashboard.todaysRevenue')}: <Text className="text-green-600 font-bold">{stats.todayRevenue.toLocaleString()} ₺</Text></Text>
             </View>
-          }
-        />
-      )}
 
-      {/* FAB (Ekle Butonu) */}
-      <TouchableOpacity
-        onPress={() => router.push("/(admin)/add")}
-        className="absolute bottom-8 right-6 bg-amber-900 w-14 h-14 rounded-full items-center justify-center shadow-lg"
-      >
-        <Ionicons name="add" size={30} color="white" />
-      </TouchableOpacity>
+            {/* A. Stat Cards (Grid) */}
+            <View className="px-5 flex-row flex-wrap justify-between">
+                <StatCard 
+                    title={t('admin.dashboard.totalRevenue')} 
+                    value={`${stats.totalRevenue.toLocaleString()} ₺`}
+                    icon="wallet" 
+                    color="#059669" // green-600
+                    bgColor="bg-green-50"
+                />
+                <StatCard 
+                    title={t('admin.dashboard.activeOrders')} 
+                    value={stats.activeOrdersCount}
+                    icon="cube" 
+                    color="#2563eb" // blue-600
+                    bgColor="bg-blue-50"
+                />
+                <StatCard 
+                    title={t('admin.dashboard.totalUsers')} 
+                    value={stats.uniqueUsers}
+                    icon="people" 
+                    color="#7c3aed" // violet-600
+                    bgColor="bg-violet-50"
+                />
+                <StatCard 
+                    title={t('admin.dashboard.lowStock')} 
+                    value={stats.lowStockCount}
+                    icon="alert-circle" 
+                    color="#dc2626" // red-600
+                    bgColor="bg-red-50"
+                />
+            </View>
+
+            {/* B. Sales Trend (Chart Kit) */}
+            <View className="mx-5 mb-6 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                <View className="flex-row justify-between items-center mb-4">
+                    <Text className="font-bold text-gray-800">{t('admin.dashboard.salesTrend')}</Text>
+                </View>
+                <LineChart
+                    data={{
+                    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+                    datasets: [
+                        {
+                        data: [
+                            Math.random() * 100,
+                            Math.random() * 100,
+                            Math.random() * 100,
+                            Math.random() * 100,
+                            Math.random() * 100,
+                            Math.random() * 100
+                        ]
+                        }
+                    ]
+                    }}
+                    width={screenWidth - 70} // 30 padding + 40 inner padding
+                    height={220}
+                    yAxisLabel="₺"
+                    yAxisSuffix="k"
+                    yAxisInterval={1}
+                    chartConfig={{
+                    backgroundColor: "#ffffff",
+                    backgroundGradientFrom: "#ffffff",
+                    backgroundGradientTo: "#ffffff",
+                    decimalPlaces: 0,
+                    color: (opacity = 1) => `rgba(245, 158, 11, ${opacity})`, // Amber-500
+                    labelColor: (opacity = 1) => `rgba(107, 114, 128, ${opacity})`, // Gray-500
+                    style: {
+                        borderRadius: 16
+                    },
+                    propsForDots: {
+                        r: "4",
+                        strokeWidth: "2",
+                        stroke: "#d97706" // Amber-600
+                    }
+                    }}
+                    bezier
+                    style={{
+                        marginVertical: 8,
+                        borderRadius: 16
+                    }}
+                />
+            </View>
+
+            {/* C. Quick Actions (Grid) */}
+            <View className="mb-2 px-5">
+                <Text className="text-sm font-bold text-gray-800 mb-3 uppercase tracking-wider">{t('admin.dashboard.quickActions')}</Text>
+                <View className="flex-row flex-wrap justify-between">
+                    <QuickAction 
+                        title={t('admin.adminProducts.title')} 
+                        icon="list-outline" 
+                        onPress={() => router.push("/(admin)/products")}
+                    />
+                    <QuickAction 
+                        title={t('admin.dashboard.newProduct')} 
+                        icon="add-circle-outline" 
+                        onPress={() => router.push("/(admin)/add")}
+                    />
+                    <QuickAction 
+                        title={t('admin.dashboard.viewOrders')} 
+                        icon="receipt-outline" 
+                        onPress={() => router.push("/(admin)/orders")}
+                    />
+                     <QuickAction 
+                        title={t('analytics.title')} 
+                        icon="bar-chart-outline" 
+                        onPress={() => router.push("/(admin)/revenue")}
+                    />
+                     <QuickAction 
+                        title={t('customers.title')} 
+                        icon="people-outline" 
+                        onPress={() => router.push("/(admin)/customers")}
+                    />
+                    <QuickAction 
+                        title={t('admin.dashboard.attributes')} 
+                        icon="options-outline" 
+                        onPress={() => router.push("/(admin)/attributes")}
+                    />
+                    <QuickAction 
+                        title={t('admin.dashboard.viewProfile')} 
+                        icon="person-outline" 
+                        onPress={() => router.push("/profile")}
+                    />
+                    {/* Placeholder for alignment if odd number in desktop */}
+                     <View style={{ width: screenWidth > 768 ? '23%' : '48%' }} /> 
+                </View>
+            </View>
+
+            {/* D. Top Selling Products */}
+            <View className="mx-5 mt-2">
+                 <Text className="text-sm font-bold text-gray-800 mb-3 uppercase tracking-wider">{t('admin.dashboard.topSelling')}</Text>
+                 <View className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                    {stats.topSelling.length === 0 ? (
+                        <Text className="p-4 text-gray-400 text-sm">{t('adminOrders.empty')}</Text>
+                    ) : (
+                        stats.topSelling.map((item, index) => (
+                            <View key={index} className={`flex-row items-center p-3 ${index !== stats.topSelling.length -1 ? 'border-b border-gray-50' : ''}`}>
+                                <Image source={{ uri: item.image }} className="w-10 h-10 rounded-lg bg-gray-100" />
+                                <View className="flex-1 ml-3">
+                                    <Text className="text-gray-800 font-medium text-sm" numberOfLines={1}>{item.title}</Text>
+                                    <Text className="text-gray-400 text-xs">{item.count} {t('common.sales')}</Text>
+                                </View>
+                                <View className="bg-amber-50 px-2 py-1 rounded-md">
+                                    <Text className="text-amber-800 font-bold text-xs">#{index + 1}</Text>
+                                </View>
+                            </View>
+                        ))
+                    )}
+                 </View>
+            </View>
+
+             {/* E. Recent Activity */}
+             <View className="mx-5 mt-6">
+                 <Text className="text-sm font-bold text-gray-800 mb-3 uppercase tracking-wider">{t('admin.dashboard.recentActivity')}</Text>
+                 <View className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                    {stats.recentActivity.length === 0 ? (
+                        <Text className="p-4 text-gray-400 text-sm">{t('adminOrders.empty')}</Text>
+                    ) : (
+                        stats.recentActivity.map((order, index) => (
+                            <View key={order.id} className={`flex-row items-center p-4 ${index !== stats.recentActivity.length -1 ? 'border-b border-gray-50' : ''}`}>
+                                <View className={`w-2 h-2 rounded-full mr-3 ${order.status === 'delivered' ? 'bg-green-500' : 'bg-blue-500'}`} />
+                                <View className="flex-1">
+                                    <Text className="text-gray-800 font-medium text-sm">
+                                        {t('orders.orderNumber')}: #{order.id.slice(0, 6).toUpperCase()}
+                                    </Text>
+                                    <Text className="text-gray-400 text-xs mt-0.5">
+                                        {order.items?.length || 0} {t('common.items')} • {order.totalAmount} ₺
+                                    </Text>
+                                </View>
+                                <Text className="text-gray-400 text-xs">
+                                   {order.createdAt?.seconds ? new Date(order.createdAt.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ''}
+                                </Text>
+                            </View>
+                        ))
+                    )}
+                 </View>
+            </View>
+        </ScrollView>
     </ScreenWrapper>
   );
 }

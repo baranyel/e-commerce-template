@@ -43,27 +43,17 @@ export default function OrderDetailScreen() {
   }, [id]);
 
   // --- STATÜ EŞLEŞTİRME FONKSİYONU ---
-  // DB'den gelen karmaşık metinleri temiz anahtarlara çevirir
   const getStatusLabel = (status: string) => {
-    const s = status?.toLowerCase();
-
-    if (s === "pending" || s === "sipariş alındı")
-      return t("orders.status.pending");
-    if (s === "preparing" || s === "hazırlanıyor")
-      return t("orders.status.preparing");
-    if (s === "shipped" || s === "kargolandı")
-      return t("orders.status.shipped");
-    if (s === "delivered" || s === "teslim edildi")
-      return t("orders.status.delivered");
-
-    return status; // Tanımsızsa olduğu gibi göster
+    // Phase 1: Database now stores standard keys (pending, shipped, etc.)
+    // We can directly translate using the key.
+    return t(`orders.status.${status?.toLowerCase()}`) || status;
   };
 
   // Statüye göre renk belirleme
   const getStatusColor = (status: string) => {
     const s = status?.toLowerCase();
-    if (s === "delivered" || s === "teslim edildi") return "bg-green-500";
-    if (s === "shipped" || s === "kargolandı") return "bg-blue-500";
+    if (s === "delivered") return "bg-green-500";
+    if (s === "shipped") return "bg-blue-500";
     if (s === "cancelled") return "bg-red-500";
     return "bg-amber-500"; // pending, preparing vs.
   };
@@ -78,7 +68,7 @@ export default function OrderDetailScreen() {
   if (!order)
     return (
       <View className="flex-1 bg-white justify-center items-center">
-        <Text>Sipariş bulunamadı.</Text>
+        <Text>{t("orders.notFound")}</Text>
       </View>
     );
 

@@ -2,6 +2,8 @@ import React from "react";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Link, Tabs } from "expo-router";
 import { Pressable, View, Platform } from "react-native";
+// 1. İMPORT EKLE
+import { useTranslation } from "react-i18next";
 
 import Colors from "@/constants/Colors";
 import { useColorScheme } from "@/components/useColorScheme";
@@ -16,53 +18,45 @@ function TabBarIcon(props: {
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  
+  // 2. TRANSLATION HOOK'UNU ÇAĞIR
+  const { t } = useTranslation();
 
-  // Renk Ayarları
-  // Dış taraf (Boşluklar): Açık modda Gri (#F3F4F6), Koyu modda Tam Siyah
   const outerBackgroundColor = colorScheme === "dark" ? "#000000" : "#f5f5f5";
-
-  // İç taraf (İçerik): Açık modda Beyaz, Koyu modda Koyu Gri/Siyah
   const innerBackgroundColor = Colors[colorScheme ?? "light"].background;
 
   return (
-    // 1. KATMAN: Tün Ekran Arka Planı (Kenar boşluklarına rengini veren yer)
     <View style={{ flex: 1, backgroundColor: outerBackgroundColor }}>
-      {/* 2. KATMAN: İçerik Kutusu (Maksimum 1200px) */}
       <View
         style={{
           flex: 1,
           width: "100%",
           maxWidth: 1200,
           alignSelf: "center",
-          backgroundColor: innerBackgroundColor, // İçeriğin zemin rengi
-
-          // Sınırın iyice belli olması için hafif bir gölge (Opsiyonel ama çok şık durur)
+          backgroundColor: innerBackgroundColor,
           shadowColor: "#000",
           shadowOffset: { width: 0, height: 0 },
           shadowOpacity: 0.1,
           shadowRadius: 20,
-          elevation: 5, // Android gölgesi
-
-          // Kenarların keskin durmaması için (Sadece Web'de istersen)
-          // overflow: 'hidden' // Gerekirse açabilirsin
+          elevation: 5,
         }}
       >
         <Tabs
           screenOptions={{
             tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
             headerShown: useClientOnlyValue(false, true),
-            // TabBar'ın da arka planını içerikle eşleştirelim
             tabBarStyle: {
               backgroundColor: innerBackgroundColor,
-              borderTopWidth: 0, // Çizgiyi kaldırıp daha temiz görüntü
-              elevation: 0, // Android gölgesini kaldır
+              borderTopWidth: 0,
+              elevation: 0,
             },
           }}
         >
           <Tabs.Screen
             name="index"
             options={{
-              title: "Anasayfa",
+              // 3. STATİK METNİ DEĞİŞTİR
+              title: t("tabs.home"), 
               tabBarIcon: ({ color }) => (
                 <TabBarIcon name="home" color={color} />
               ),
@@ -85,7 +79,8 @@ export default function TabLayout() {
           <Tabs.Screen
             name="two"
             options={{
-              title: "Keşfet",
+              // 3. STATİK METNİ DEĞİŞTİR
+              title: t("tabs.explore"),
               tabBarIcon: ({ color }) => (
                 <TabBarIcon name="search" color={color} />
               ),
@@ -94,7 +89,8 @@ export default function TabLayout() {
           <Tabs.Screen
             name="profile"
             options={{
-              title: "Profil",
+              // 3. STATİK METNİ DEĞİŞTİR
+              title: t("tabs.profile"),
               tabBarIcon: ({ color }) => (
                 <TabBarIcon name="user" color={color} />
               ),

@@ -1,7 +1,9 @@
 import React from "react";
 import { View, Text, Image, TouchableOpacity, ViewStyle } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Product } from "../../types";
+import { useFavorites } from "../../hooks/useFavorites";
 
 interface ProductCardProps {
   item: Product;
@@ -12,6 +14,7 @@ interface ProductCardProps {
   onEdit?: (item: Product) => void;
   onDelete?: (item: Product) => void;
   showStockWarning?: boolean;
+  containerStyle?: ViewStyle;
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({
@@ -23,7 +26,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   onEdit,
   onDelete,
   showStockWarning = true,
+  containerStyle,
 }) => {
+  const { t } = useTranslation();
+  const { favoriteIds, toggleFavorite } = useFavorites();
+  const isFavorite = favoriteIds.includes(item.id);
   const isLowStock = showStockWarning && item.stock < 5;
 
   if (layout === "grid") {
@@ -31,11 +38,26 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       <TouchableOpacity
         onPress={onPress}
         className="flex-1 m-2 bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 relative"
+        style={containerStyle}
       >
         {isAdmin && isLowStock && (
-          <View className="absolute top-2 right-2 z-10 bg-red-100 px-2 py-1 rounded-md">
-            <Text className="text-red-600 text-[10px] font-bold">STOK AZ</Text>
+          <View className="absolute top-2 left-2 z-10 bg-red-100 px-2 py-1 rounded-md">
+            <Text className="text-red-600 text-[10px] font-bold">{t("product.lowStock")}</Text>
           </View>
+        )}
+        
+        {/* Favorite Button (User Only) */}
+        {!isAdmin && (
+            <TouchableOpacity 
+                onPress={(e) => { e.stopPropagation(); toggleFavorite(item); }}
+                className="absolute top-2 right-2 z-10 bg-white/80 p-1.5 rounded-full shadow-sm"
+            >
+                <Ionicons 
+                    name={isFavorite ? "heart" : "heart-outline"} 
+                    size={20} 
+                    color={isFavorite ? "#ef4444" : "#9ca3af"} 
+                />
+            </TouchableOpacity>
         )}
 
         <Image
@@ -63,7 +85,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                   }}
                   className="bg-amber-100 p-2 rounded-full"
                 >
-                  <Text className="text-amber-800 font-bold text-xs">+</Text>
+                  <Text className="text-amber-800 font-bold text-xs">{t("product.addToCart")}</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -78,7 +100,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                       isLowStock ? "text-red-500 font-bold" : "text-gray-400"
                     }`}
                   >
-                    Stok: {item.stock}
+                    {t("product.stock")}: {item.stock}
                   </Text>
                 </View>
 
@@ -118,6 +140,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     <TouchableOpacity
       onPress={onPress}
       className="flex-row mb-3 bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden p-3"
+      style={containerStyle}
     >
       <Image
         source={{ uri: item.images[0] || "https://via.placeholder.com/150" }}
@@ -125,15 +148,32 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       />
       <View className="flex-1 ml-4 justify-between py-1">
         <View>
-          <View className="flex-row justify-between">
+          <View className="flex-row justify-between items-start">
              <Text className="text-xs text-amber-800 font-bold uppercase mb-1">
                 {item.category}
               </Text>
-              {isAdmin && isLowStock && (
-                <Text className="text-red-500 text-xs font-bold ml-2">
-                  KRİTİK STOK
-                </Text>
-              )}
+              {/* Actions Row Top Right */}
+              <View className="flex-row items-center space-x-2">
+                 {/* Favorite Button (User only) */}
+                  {!isAdmin && (
+                        <TouchableOpacity 
+                            onPress={(e) => { e.stopPropagation(); toggleFavorite(item); }}
+                            className="mr-1"
+                        >
+                            <Ionicons 
+                                name={isFavorite ? "heart" : "heart-outline"} 
+                                size={22} 
+                                color={isFavorite ? "#ef4444" : "#9ca3af"} 
+                            />
+                        </TouchableOpacity>
+                  )}
+                  
+                  {isAdmin && isLowStock && (
+                    <Text className="text-red-500 text-xs font-bold ml-2">
+                    {t("product.criticalStock")}
+                    </Text>
+                  )}
+              </View>
           </View>
          
           <Text className="text-gray-900 font-bold text-lg" numberOfLines={1}>
@@ -157,7 +197,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                     }}
                     className="bg-amber-100 px-3 py-1 rounded-full"
                   >
-                    <Text className="text-amber-900 font-bold text-xs">Ekle +</Text>
+                    <Text className="text-amber-900 font-bold text-xs">{t("product.addToCart")}</Text>
                   </TouchableOpacity>
               )}
             </View>
@@ -165,7 +205,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
              <View className="flex-row justify-between items-center mt-2">
                 <View>
                     <Text className="text-gray-500 text-xs">
-                        {item.stock} Adet
+                        {item.stock} {t("product.pieces")}
                     </Text>
                     <Text className="text-amber-800 font-bold">
                         {item.price} {item.currency}

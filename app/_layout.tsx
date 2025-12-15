@@ -10,26 +10,46 @@ import Toast from "react-native-toast-message";
 import i18n from "../i18n/i18n"; // <-- i18n'i import et
 import "../global.css";
 
-// Bu component sadece routing kontrolünü yapar
+// Core Navigation Logic
+import { usePushNotifications } from "../hooks/usePushNotifications";
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "../firebase/config";
+import { LoadingProvider } from "../context/LoadingContext"; // 1. Import LoadingProvider
+import { CurtainLoader } from "../components/ui/CurtainLoader"; // 1. Import CurtainLoader
+
 function RootLayoutNav() {
   const { user, loading } = useAuth();
-  const segments = useSegments(); // Kullanıcının şu an hangi sayfada olduğunu söyler
+  const segments = useSegments();
   const router = useRouter();
+  
+  // Initialize Notifications & Get Token
+  const { expoPushToken } = usePushNotifications();
+
+  // Save Token to Firestore when User logins
+  useEffect(() => {
+    if (user && expoPushToken) {
+       const saveToken = async () => {
+         try {
+           await setDoc(doc(db, "users", user.uid), { pushToken: expoPushToken }, { merge: true });
+         } catch (e) {
+           console.log("Error saving push token:", e);
+         }
+       };
+       saveToken();
+    }
+  }, [user, expoPushToken]);
 
   useEffect(() => {
     if (loading) return;
 
     const inTabsGroup = segments[0] === "(tabs)";
-    const inLoginRoute = segments[0] === "login"; // Kullanıcı şu an Login sayfasında mı?
+    const inLoginRoute = segments[0] === "login";
 
     if (!user && !inLoginRoute) {
-      // 1. Kullanıcı YOKSA ve Login sayfasında DEĞİLSE -> Login'e at
       router.replace("/login");
     } else if (user && inLoginRoute) {
-      // 2. Kullanıcı VARSA ve Login sayfasına girmeye çalışıyorsa -> Ana Sayfaya (Tabs) at
       router.replace("/(tabs)");
     }
-    // 3. Kullanıcı VARSA ve Login dışında bir yerdeyse (Örn: /product/123) -> KARIŞMA, rahat bıraksın.
   }, [user, loading, segments]);
 
   useEffect(() => {
@@ -47,20 +67,16 @@ function RootLayoutNav() {
   }, []);
 
   if (loading) {
-    // Siyah ekran yerine dönen bir çark gösterelim
     return (
       <View className="flex-1 justify-center items-center bg-white">
         <ActivityIndicator size="large" color="#4a2c2a" />
-        {/* NativeWind v4 ile stil veriyoruz */}
       </View>
     );
   }
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
-      {/* Login ekranı */}
       <Stack.Screen name="login" options={{ headerShown: false }} />
-      {/* Ana uygulama (Sekmeler) */}
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
     </Stack>
   );
@@ -71,11 +87,12 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <AuthProvider>
         <CartProvider>
-          {" "}
-          {/* <-- AUTH PROVIDER'IN İÇİNE EKLE */}
-          <RootLayoutNav />
-          <CartSidebar />
-          <Toast />
+          <LoadingProvider>
+            <RootLayoutNav />
+            <CartSidebar />
+            <CurtainLoader />
+            <Toast />
+          </LoadingProvider>
         </CartProvider>
       </AuthProvider>
     </SafeAreaProvider>
