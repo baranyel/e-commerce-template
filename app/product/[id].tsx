@@ -87,7 +87,7 @@ export default function ProductDetailScreen() {
         <Stack.Screen
           options={{
             headerShown: true,
-            title: product.title,
+            title: product.title + " | Lupin Coffee",
             headerTintColor: "#000",
             headerBackTitle: "Geri",
           }}
@@ -133,9 +133,8 @@ export default function ProductDetailScreen() {
             <TouchableOpacity
               onPress={() => addToCart(product)}
               disabled={isOutOfStock} // Stok yoksa tıklanmasın
-              className={`px-8 py-4 rounded-xl flex-row items-center ${
-                isOutOfStock ? "bg-gray-300" : "bg-amber-900" // Stok yoksa gri, varsa kahve rengi
-              }`}
+              className={`px-8 py-4 rounded-xl flex-row items-center ${isOutOfStock ? "bg-gray-300" : "bg-amber-900" // Stok yoksa gri, varsa kahve rengi
+                }`}
             >
               <Ionicons
                 name="cart"

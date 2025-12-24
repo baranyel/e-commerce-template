@@ -22,7 +22,7 @@ import {
 import { db } from "../../firebase/config";
 import { seedDatabase } from "../../firebase/seed";
 import { Product } from "../../types";
-import { useRouter } from "expo-router";
+import { useRouter, Stack } from "expo-router";
 import { useCart } from "../../context/CartContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
@@ -53,10 +53,10 @@ export default function HomeScreen() {
         const data = doc.data() as Product;
         // Client-side filter: Treat undefined as true (Active)
         if (data.isActive === false) return;
-        
+
         fetchedProducts.push({
-          id: doc.id,
           ...data,
+          id: doc.id,
         });
       });
       setFeaturedProducts(fetchedProducts.slice(0, 5)); // Set featured products, sliced to 5
@@ -153,11 +153,14 @@ export default function HomeScreen() {
 
   return (
     <ScreenWrapper>
+      <Stack.Screen options={{ title: "Anasayfa" }} />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 30 }}
       >
-        {/* Header Kısmı */}
+        {/* Header Kısmı
+        
+        
         <View className="px-6 py-4 flex-row justify-between items-center bg-white shadow-sm z-10 sticky top-0 w-full">
           <Text className="text-amber-900 font-bold text-xl tracking-tight">
             Lupin Coffee.
@@ -172,7 +175,8 @@ export default function HomeScreen() {
               </Text>
             </TouchableOpacity>
           )}
-        </View>
+        </View>*/}
+
 
         {/* 1. Hero */}
         <HeroSection />
@@ -238,6 +242,6 @@ export default function HomeScreen() {
           )}
         </View>
       </ScrollView>
-    </ScreenWrapper>
+    </ScreenWrapper >
   );
 }

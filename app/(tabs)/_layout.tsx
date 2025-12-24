@@ -18,7 +18,7 @@ function TabBarIcon(props: {
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
-  
+
   // 2. TRANSLATION HOOK'UNU ÇAĞIR
   const { t } = useTranslation();
 
@@ -56,22 +56,13 @@ export default function TabLayout() {
             name="index"
             options={{
               // 3. STATİK METNİ DEĞİŞTİR
-              title: t("tabs.home"), 
+              title: t("tabs.home"),
               tabBarIcon: ({ color }) => (
                 <TabBarIcon name="home" color={color} />
               ),
               headerRight: () => (
                 <Link href="/modal" asChild>
-                  <Pressable>
-                    {({ pressed }) => (
-                      <FontAwesome
-                        name="info-circle"
-                        size={25}
-                        color={Colors[colorScheme ?? "light"].text}
-                        style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
-                      />
-                    )}
-                  </Pressable>
+
                 </Link>
               ),
             }}

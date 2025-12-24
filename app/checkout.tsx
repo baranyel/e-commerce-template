@@ -11,7 +11,7 @@ import {
   Platform,
   Switch,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, Stack } from "expo-router";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { useLoading } from "../context/LoadingContext"; // Import Global Loader
@@ -130,7 +130,7 @@ export default function CheckoutScreen() {
         items: cart,
         totalAmount: totalPrice,
         currency: "TRY",
-        status: "pending", 
+        status: "pending",
         address: form,
         createdAt: Date.now(),
         orderNumber: orderNumber,
@@ -164,20 +164,20 @@ export default function CheckoutScreen() {
 
       // SEND NOTIFICATION (Local User)
       if (user) {
-          const userDoc = await getDoc(doc(db, "users", user.uid));
-          if (userDoc.exists() && userDoc.data().pushToken) {
-              await sendPushNotification(
-                  userDoc.data().pushToken,
-                  t('notifications.orderCreatedTitle'),
-                  t('notifications.orderCreatedBody')
-              );
-          }
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists() && userDoc.data().pushToken) {
+          await sendPushNotification(
+            userDoc.data().pushToken,
+            t('notifications.orderCreatedTitle'),
+            t('notifications.orderCreatedBody')
+          );
+        }
       }
 
       // 3. Yonlendirme
       setTimeout(() => {
-          hideLoading();
-          router.replace("/orders");
+        hideLoading();
+        router.replace("/orders");
       }, 2000); // 2 saniye bekle, sonra git (animasyon icin)
 
     } catch (error) {
@@ -221,6 +221,7 @@ export default function CheckoutScreen() {
       >
         {" "}
         <SafeAreaView className="flex-1 bg-gray-50">
+          <Stack.Screen options={{ title: t('checkout.title') + " | Lupin Coffee" }} />
           {/* Header */}
           <View className="flex-row items-center p-4 bg-white shadow-sm border-b border-gray-100">
             <TouchableOpacity onPress={() => router.back()} className="mr-4">
@@ -306,11 +307,10 @@ export default function CheckoutScreen() {
                   className="flex-row items-start"
                 >
                   <View
-                    className={`w-6 h-6 rounded border mr-3 items-center justify-center ${
-                      kvkkAccepted
-                        ? "bg-amber-900 border-amber-900"
-                        : "border-gray-300 bg-white"
-                    }`}
+                    className={`w-6 h-6 rounded border mr-3 items-center justify-center ${kvkkAccepted
+                      ? "bg-amber-900 border-amber-900"
+                      : "border-gray-300 bg-white"
+                      }`}
                   >
                     {kvkkAccepted && (
                       <Ionicons name="checkmark" size={16} color="white" />
@@ -355,9 +355,8 @@ export default function CheckoutScreen() {
             <TouchableOpacity
               onPress={handleOrder}
               disabled={loading}
-              className={`p-4 rounded-xl flex-row justify-center items-center ${
-                loading ? "bg-gray-400" : "bg-green-700"
-              }`}
+              className={`p-4 rounded-xl flex-row justify-center items-center ${loading ? "bg-gray-400" : "bg-green-700"
+                }`}
             >
               {loading ? (
                 <ActivityIndicator color="white" />
